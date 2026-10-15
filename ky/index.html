@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#12674A">
+<meta name="robots" content="noindex,nofollow">
+<title>Xác nhận thuê xe · An Việt Móng Cái</title>
+<!-- Trang ký điện tử Điều kiện thuê xe · v1.0 · 15/10/2026 · QĐ-D206–D211
+     Chỉ hiện dữ liệu khi có mã phiếu 1 lần (?t=…). Không lưu gì trong máy khách. Cổng = zz_v57 (Apps Script). -->
+<style>
+  :root{--muc:#16181D;--nen:#EEF1F4;--the:#fff;--vien:#C9CFD8;--mo:#5B6372;--xanh:#12674A;--xanh2:#0E5239;--do:#A3231C;--vang:#FFF3BF;--r:14px}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--nen);color:var(--muc);font:16px/1.5 ui-sans-serif,-apple-system,"Segoe UI",Roboto,"Noto Sans SC","PingFang SC",Arial,sans-serif;-webkit-text-size-adjust:100%}
+  .hop{max-width:560px;margin:0 auto;padding:12px 16px 40px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0 12px}
+  header b{font-size:16px}
+  .nn{display:flex;gap:4px}
+  .nn button{border:1px solid var(--vien);background:#fff;border-radius:999px;padding:6px 10px;font-size:14px;color:var(--muc)}
+  .nn button.chon{background:var(--muc);color:#fff;border-color:var(--muc)}
+  .the{background:var(--the);border-radius:var(--r);padding:14px 16px;margin:0 0 12px;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+  h1{font-size:20px;margin:0 0 4px}
+  h2{font-size:16px;margin:0 0 8px}
+  .mo{color:var(--mo);font-size:14px}
+  .dong{display:flex;justify-content:space-between;gap:12px;padding:5px 0;border-bottom:1px solid #EEF0F3;font-size:15px}
+  .dong:last-child{border-bottom:0}
+  .dong span:first-child{color:var(--mo)}
+  .dong span:last-child{text-align:right;font-weight:600}
+  .xe{border:1px solid #E3E6EB;border-radius:10px;padding:8px 10px;margin:8px 0}
+  .xe b{display:block}
+  ul.bb{margin:0;padding-left:20px}
+  ul.bb li{margin:4px 0}
+  .nut2{display:block;width:100%;background:none;border:1px solid var(--vien);border-radius:10px;padding:11px;font-size:15px;color:var(--muc);margin-top:10px}
+  #toanVan{display:none;max-height:60vh;overflow:auto;border:1px solid #E3E6EB;border-radius:10px;padding:10px 12px;margin-top:10px;font-size:13.5px;line-height:1.5;background:#FAFBFC}
+  #toanVan p{margin:0 0 8px}
+  #toanVan .ghi{background:var(--vang);padding:8px;border-radius:8px}
+  label.o{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid #EEF0F3;font-size:15px}
+  label.o:last-of-type{border-bottom:0}
+  label.o input{width:24px;height:24px;flex:0 0 24px;margin:0;accent-color:var(--xanh)}
+  input.o-nhap,select{width:100%;font-size:17px;padding:12px;border:1px solid var(--vien);border-radius:10px;background:#fff;color:var(--muc)}
+  .hang{display:flex;gap:8px}
+  .hang select{flex:0 0 38%}
+  .khungKy{position:relative;border:2px dashed var(--vien);border-radius:12px;background:#fff;touch-action:none;margin-top:6px}
+  .khungKy canvas{display:block;width:100%;height:180px;border-radius:12px}
+  .khungKy .goi{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;color:#B7BDC7;pointer-events:none;font-size:15px}
+  .kyLai{background:none;border:0;color:var(--mo);text-decoration:underline;font-size:14px;padding:6px 0;margin-top:4px}
+  .chinh{display:block;width:100%;margin-top:14px;padding:16px;font-size:18px;font-weight:700;border:0;border-radius:12px;background:var(--xanh);color:#fff}
+  .chinh:disabled{background:#AEB5BF}
+  .loi{color:var(--do);font-size:14px;margin-top:8px;min-height:1px}
+  .xong{text-align:center}
+  .xong .dau{font-size:52px;line-height:1}
+  .lienhe{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}
+  .lienhe a,.lienhe button{display:block;text-align:center;padding:11px 4px;border-radius:10px;border:1px solid var(--vien);background:#fff;color:var(--muc);text-decoration:none;font-size:14px}
+  .nhac{background:var(--vang);border-radius:10px;padding:10px 12px;text-align:left;font-size:15px;margin-top:12px}
+  .che{position:fixed;inset:0;background:rgba(255,255,255,.75);display:none;align-items:center;justify-content:center;font-weight:600;z-index:9}
+  .che.hien{display:flex}
+  .an{display:none!important}
+</style>
+</head>
+<body>
+<div class="hop">
+  <header><b>An Việt · Móng Cái</b>
+    <div class="nn"><button data-nn="vi">VI</button><button data-nn="en">EN</button><button data-nn="zh">中文</button></div>
+  </header>
+  <div id="noiDung"><div class="the mo" id="tai">…</div></div>
+</div>
+<div class="che" id="che"><span id="cheChu">…</span></div>
+
+<script>
+(function () {
+  'use strict';
+  var CONG = 'https://script.google.com/macros/s/AKfycbyYcei_p4LostxboXINvDDUVjRvmJdkelJ6GvOVzQBlQYDzWzV5ZwSZNcxbI6Rpdyd2/exec';
+  var HOTLINE = '0399.529.221', ZALO = 'https://zalo.me/0399529221', WA = 'https://wa.me/84399529221', WECHAT = 'xedienmongcai1';
+  var T = {
+    vi: {
+      tai: 'Đang tải phiếu thuê…', tieuDe: 'Xác nhận thuê xe', hd: 'Hợp đồng', benA: 'Bên cho thuê', benB: 'Người thuê',
+      nhan: 'Nhận xe', tra: 'Hạn trả', tienThue: 'Tiền thuê', coc: 'Ký cược', pin: 'Pin lúc giao', goi: 'Gói',
+      quaGio: 'Quá giờ', sac: 'Bộ sạc kèm xe', co: 'Có', khong: 'Không', tong: 'Tổng',
+      bb: '6 điều bắt buộc',
+      bbDs: ['Chỉ đi trong P. Móng Cái 1, 2, 3 — ra ngoài phải nhắn và được Bên A đồng ý trước.',
+             'Pin còn 15% → báo ngay. Dưới 10% → cấm đi tiếp, phạt 200.000 / 500.000 / 800.000 đ.',
+             'Cấm đi đường ngập (mọi độ sâu), bãi cát, bãi biển, đường đất, gồ ghề.',
+             'Mỗi xe gắn định vị GPS trong kỳ thuê.',
+             'Phạt nguội xảy ra trong kỳ thuê, phát hiện trong 45 ngày sau khi trả xe, do người thuê chịu.',
+             'Không giao xe cho người khác khi chưa được Bên A đồng ý bằng tin nhắn.'],
+      docToanVan: 'Đọc toàn văn Điều kiện thuê xe', anToanVan: 'Thu gọn toàn văn',
+      ghiNgonNgu: '',
+      xn: 'Xác nhận',
+      o1: 'Tôi đã đọc và đồng ý <b>Điều kiện thuê xe {ban}</b> (Điều 1–9 và các xác nhận (a)–(h) Mục B).',
+      o2: 'Tôi đồng ý xử lý dữ liệu cá nhân và <b>dữ liệu định vị</b> các xe theo Điều 8.',
+      o3: 'Tôi đã kiểm tra xe: <b>hiện trạng, mức pin, phụ kiện</b> đúng như phiếu.',
+      lienHe: 'Số điện thoại của bạn', lienHeGoi: 'Số điện thoại / ID',
+      kenh: ['Zalo', 'WhatsApp', 'WeChat', 'Điện thoại'],
+      kyTen: 'Ký tên', kyGoi: 'Ký bằng ngón tay vào đây', kyLai: 'Ký lại',
+      nut: 'XÁC NHẬN THUÊ XE', dangGui: 'Đang ghi nhận…',
+      thieuO: 'Chưa đánh dấu đủ 3 ô xác nhận.', thieuSdt: 'Chưa nhập số liên hệ (ít nhất 8 chữ số).', thieuKy: 'Chữ ký quá ngắn — ký lại.',
+      matMang: 'Chưa gửi được — kiểm tra mạng rồi bấm lại. Chữ ký và các ô đã đánh dấu vẫn giữ nguyên.',
+      xong: 'ĐÃ XÁC NHẬN', xongMo: 'Hợp đồng {hd} đã giao kết lúc {luc}.', taiPdf: 'Tải bản hợp đồng (PDF)',
+      nhan2: 'Nhắn Bên A', nhac: ['Pin còn 15% → báo ngay ' + HOTLINE, 'Dưới 10% → dừng xe, chờ Bên A', 'Trả xe trước {tra}'],
+      loiMA: 'Đường dẫn không hợp lệ.', loiHET: 'Mã đã hết hạn.', loiHUY: 'Mã này đã được thay bằng mã mới.',
+      loiChung: 'Nhờ Bên A tạo mã mới trong app, hoặc gọi ' + HOTLINE + '.', loiMang: 'Không mở được trang — kiểm tra mạng (Wi-Fi) rồi tải lại.', thuLai: 'Thử lại',
+      saoChep: 'Đã chép ID WeChat'
+    },
+    en: {
+      tai: 'Loading your rental form…', tieuDe: 'Confirm your rental', hd: 'Contract', benA: 'Owner', benB: 'Renter',
+      nhan: 'Pick-up', tra: 'Return by', tienThue: 'Rental', coc: 'Deposit', pin: 'Battery at hand-over', goi: 'Package',
+      quaGio: 'Late fee', sac: 'Charger included', co: 'Yes', khong: 'No', tong: 'Total',
+      bb: '6 must-know rules',
+      bbDs: ['Ride only within Móng Cái wards 1, 2, 3 — going further needs the owner’s prior OK by message.',
+             'Battery at 15% → tell the owner at once. Below 10% → do NOT ride on; fines VND 200,000 / 500,000 / 800,000.',
+             'No flooded roads (any depth), sand, beaches, dirt or rough roads.',
+             'Every bike has a GPS tracker during the rental.',
+             'Traffic fines from the rental period, found within 45 days after return, are paid by the renter.',
+             'Do not hand the bike to anyone else without the owner’s OK by message.'],
+      docToanVan: 'Read the full rental terms', anToanVan: 'Hide full terms',
+      ghiNgonNgu: 'English summary below, then the full Vietnamese text. The Vietnamese text is the binding version.',
+      xn: 'Confirm',
+      o1: 'I have read and agree to the <b>Rental Terms {ban}</b> (Articles 1–9 and confirmations (a)–(h) in Section B).',
+      o2: 'I agree to the processing of my personal data and the bikes’ <b>GPS location data</b> (Article 8).',
+      o3: 'I have checked the bike(s): <b>condition, battery level and accessories</b> match this form.',
+      lienHe: 'Your contact number', lienHeGoi: 'Number / ID',
+      kenh: ['Zalo', 'WhatsApp', 'WeChat', 'Phone'],
+      kyTen: 'Signature', kyGoi: 'Sign here with your finger', kyLai: 'Clear',
+      nut: 'CONFIRM RENTAL', dangGui: 'Recording…',
+      thieuO: 'Please tick all 3 boxes.', thieuSdt: 'Please enter a contact number (at least 8 digits).', thieuKy: 'Signature too short — please sign again.',
+      matMang: 'Not sent — check your connection and tap again. Your signature and ticks are kept.',
+      xong: 'CONFIRMED', xongMo: 'Contract {hd} was concluded at {luc}.', taiPdf: 'Download contract (PDF)',
+      nhan2: 'Message the owner', nhac: ['Battery 15% → message ' + HOTLINE, 'Below 10% → stop and wait for the owner', 'Return by {tra}'],
+      loiMA: 'Invalid link.', loiHET: 'This code has expired.', loiHUY: 'This code was replaced by a new one.',
+      loiChung: 'Ask the owner to create a new code, or call ' + HOTLINE + '.', loiMang: 'Cannot load — check your connection (Wi-Fi) and reload.', thuLai: 'Retry',
+      saoChep: 'WeChat ID copied'
+    },
+    zh: {
+      tai: '正在加载租车单…', tieuDe: '确认租车', hd: '合同', benA: '车主', benB: '承租人',
+      nhan: '取车', tra: '还车期限', tienThue: '租金', coc: '押金', pin: '交车电量', goi: '套餐',
+      quaGio: '超时费', sac: '随车充电器', co: '有', khong: '无', tong: '合计',
+      bb: '6条必须遵守的规定',
+      bbDs: ['仅限芒街1、2、3坊（Móng Cái 1, 2, 3）内使用——超出范围须事先经车主短信同意。',
+             '电量剩15% → 立即通知车主。低于10% → 禁止继续行驶，罚款 200,000 / 500,000 / 800,000 越南盾。',
+             '禁止驶入任何积水路段（无论深浅）、沙滩、海滩、泥路或颠簸路段。',
+             '租期内每辆车均装有GPS定位。',
+             '租期内发生、还车后45天内发现的交通违章由承租人承担。',
+             '未经车主短信同意，不得将车交给他人。'],
+      docToanVan: '阅读租车条款全文', anToanVan: '收起全文',
+      ghiNgonNgu: '下方先为中文摘要，后为越南文全文。以越南文为准。',
+      xn: '确认',
+      o1: '本人已阅读并同意<b>《租车条件 {ban}》</b>（第1–9条及B部分 (a)–(h) 各项确认）。',
+      o2: '本人同意按第8条处理个人资料及车辆<b>GPS定位数据</b>。',
+      o3: '本人已检查车辆：<b>车况、电量、配件</b>与本单一致。',
+      lienHe: '您的联系电话', lienHeGoi: '号码 / ID',
+      kenh: ['Zalo', 'WhatsApp', '微信', '电话'],
+      kyTen: '签名', kyGoi: '请用手指在此签名', kyLai: '重签',
+      nut: '确认租车', dangGui: '正在记录…',
+      thieuO: '请勾选全部3项。', thieuSdt: '请填写联系号码（至少8位数字）。', thieuKy: '签名过短，请重签。',
+      matMang: '未发送成功——请检查网络后再点一次。签名和勾选已保留。',
+      xong: '已确认', xongMo: '合同 {hd} 已于 {luc} 订立。', taiPdf: '下载合同（PDF）',
+      nhan2: '联系车主', nhac: ['电量15% → 立即联系 ' + HOTLINE, '低于10% → 停车等候车主', '请于 {tra} 前还车'],
+      loiMA: '链接无效。', loiHET: '此码已过期。', loiHUY: '此码已被新码取代。',
+      loiChung: '请车主在应用中重新生成，或致电 ' + HOTLINE + '。', loiMang: '无法加载——请检查网络（Wi-Fi）后刷新。', thuLai: '重试',
+      saoChep: '已复制微信号'
+    }
+  };
+
+  var tham = new URLSearchParams(location.search), MA = (tham.get('t') || '').trim();
+  var NN = (function () { var l = (navigator.language || 'vi').toLowerCase(); return l.indexOf('zh') === 0 ? 'zh' : l.indexOf('vi') === 0 ? 'vi' : 'en'; })();
+  var DL = null, KQ = null, DA_DOC = false, NET = 0, KENH = 0;
+  var $ = function (id) { return document.getElementById(id); };
+  var e = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  function t(k) { return T[NN][k]; }
+
+  document.querySelectorAll('.nn button').forEach(function (b) {
+    b.onclick = function () { NN = b.getAttribute('data-nn'); ve(); };
+  });
+
+  function goi(body) {
+    return fetch(CONG, { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
+  }
+  function che(b, chu) { $('che').className = b ? 'che hien' : 'che'; if (chu) $('cheChu').textContent = chu; }
+
+  function tai() {
+    if (!/^[0-9a-f]{40}$/.test(MA)) { DL = { loi: 'MA' }; return ve(); }
+    DL = null; ve();
+    goi({ ky: 'xem', t: MA }).then(function (r) {
+      if (!r.ok) { DL = { loi: r.ma_loi || 'MA' }; return ve(); }
+      if (r.da_ky) { KQ = r; DL = { phieu: r.phieu }; return ve(); }
+      DL = r; ve();
+    }, function () { DL = { loi: 'MANG' }; ve(); });
+  }
+
+  /* ── vẽ trang theo trạng thái ── */
+  function ve() {
+    document.documentElement.lang = NN === 'zh' ? 'zh-CN' : NN;
+    document.querySelectorAll('.nn button').forEach(function (b) { b.className = b.getAttribute('data-nn') === NN ? 'chon' : ''; });
+    var nd = $('noiDung');
+    if (!DL) { nd.innerHTML = '<div class="the mo">' + t('tai') + '</div>'; return; }
+    if (DL.loi) {
+      var m = { MA: t('loiMA'), HET: t('loiHET'), HUY: t('loiHUY'), MANG: t('loiMang') }[DL.loi] || t('loiMA');
+      nd.innerHTML = '<div class="the"><h1>' + e(m) + '</h1><p class="mo">' + (DL.loi === 'MANG' ? '' : e(t('loiChung'))) + '</p>' +
+        (DL.loi === 'MANG' ? '<button class="chinh" id="thuLai">' + e(t('thuLai')) + '</button>' : '') + lienHe() + '</div>';
+      if ($('thuLai')) $('thuLai').onclick = tai;
+      ganLienHe(); return;
+    }
+    if (KQ) return veXong();
+    veForm();
+  }
+
+  function tongTien(ds, k) {
+    var s = 0; ds.forEach(function (x) { s += Number(String(x[k] || '').replace(/\D/g, '')) || 0; });
+    return s.toLocaleString('vi-VN').replace(/,/g, '.') + ' đ';
+  }
+  function hopPhieu(p) {
+    var xe = (p.xe || []).map(function (x) {
+      return '<div class="xe"><b>' + e(x.loai) + ' · ' + e(x.bien) + '</b>' +
+        '<div class="dong"><span>' + t('goi') + '</span><span>' + e(x.ht) + ' × ' + e(x.sl) + '</span></div>' +
+        '<div class="dong"><span>' + t('tienThue') + '</span><span>' + e(x.thue || x.dg) + ' đ</span></div>' +
+        '<div class="dong"><span>' + t('coc') + '</span><span>' + e(x.coc) + ' đ</span></div>' +
+        '<div class="dong"><span>' + t('pin') + '</span><span>' + e(x.pin) + '%</span></div>' +
+        '<div class="dong"><span>' + t('quaGio') + '</span><span>' + e(x.qua_gio) + ' đ / h</span></div>' +
+        '<div class="dong"><span>' + t('sac') + '</span><span>' + (x.sac ? t('co') : t('khong')) + '</span></div></div>';
+    }).join('');
+    var tong = (p.xe || []).length > 1 ? '<div class="dong"><span>' + t('tong') + ' · ' + t('tienThue') + ' / ' + t('coc') + '</span><span>' +
+      tongTien(p.xe, 'thue') + ' / ' + tongTien(p.xe, 'coc') + '</span></div>' : '';
+    return '<div class="the"><h1>' + t('tieuDe') + '</h1><div class="mo">' + t('hd') + ' ' + e(p.soHD) + '</div>' +
+      '<div class="dong"><span>' + t('benB') + '</span><span>' + e(p.ten) + '</span></div>' +
+      '<div class="dong"><span>' + t('nhan') + '</span><span>' + e(p.nhan) + '</span></div>' +
+      '<div class="dong"><span>' + t('tra') + '</span><span>' + e(p.tra) + '</span></div>' + xe + tong +
+      '<div class="dong"><span>' + t('benA') + '</span><span>' + e(p.ben_a) + '</span></div></div>';
+  }
+
+  function veForm() {
+    var p = DL.phieu, dk = DL.dk, nd = $('noiDung');
+    var giu = { o1: $('o1') && $('o1').checked, o2: $('o2') && $('o2').checked, o3: $('o3') && $('o3').checked, sdt: $('sdt') ? $('sdt').value : '' };
+    var anh = CK.coNet() ? CK.layAnh() : null;
+    var tv = (NN === 'vi' ? '' : '<p class="ghi">' + e(t('ghiNgonNgu')) + '</p>' +
+        (NN === 'en' ? dk.en_tom : dk.zh_tom).map(function (s) { return '<p>' + e(s) + '</p>'; }).join('') + '<hr>') +
+      '<p><b>' + e(dk.tieu_de) + '</b></p>' + dk.vi.map(function (s) { return '<p>' + e(s) + '</p>'; }).join('');
+    nd.innerHTML = hopPhieu(p) +
+      '<div class="the"><h2>' + t('bb') + '</h2><ul class="bb">' + t('bbDs').map(function (s) { return '<li>' + e(s) + '</li>'; }).join('') + '</ul>' +
+      '<button class="nut2" id="moTV">' + t('docToanVan') + ' ' + e(dk.ban) + '</button><div id="toanVan">' + tv + '</div></div>' +
+      '<div class="the"><h2>' + t('xn') + '</h2>' +
+      '<label class="o"><input type="checkbox" id="o1"><span>' + t('o1').replace('{ban}', e(dk.ban)) + '</span></label>' +
+      '<label class="o"><input type="checkbox" id="o2"><span>' + t('o2') + '</span></label>' +
+      '<label class="o"><input type="checkbox" id="o3"><span>' + t('o3') + '</span></label></div>' +
+      '<div class="the"><h2>' + t('lienHe') + '</h2><div class="hang"><select id="kenh">' +
+        t('kenh').map(function (k, i) { return '<option value="' + i + '"' + (i === KENH ? ' selected' : '') + '>' + e(k) + '</option>'; }).join('') +
+      '</select><input class="o-nhap" id="sdt" type="tel" inputmode="tel" autocomplete="tel" placeholder="' + e(t('lienHeGoi')) + '"></div></div>' +
+      '<div class="the"><h2>' + t('kyTen') + '</h2><div class="khungKy"><canvas id="ck"></canvas><div class="goi" id="ckGoi">' + t('kyGoi') + '</div></div>' +
+      '<button class="kyLai" id="kyLai">' + t('kyLai') + '</button>' +
+      '<button class="chinh" id="gui">' + t('nut') + '</button><div class="loi" id="loi"></div></div>';
+    $('o1').checked = !!giu.o1; $('o2').checked = !!giu.o2; $('o3').checked = !!giu.o3; $('sdt').value = giu.sdt || '';
+    $('moTV').onclick = function () {
+      var m = $('toanVan').style.display !== 'block';
+      $('toanVan').style.display = m ? 'block' : 'none';
+      this.textContent = (m ? t('anToanVan') : t('docToanVan') + ' ' + dk.ban);
+      if (m) DA_DOC = true;
+    };
+    $('kenh').onchange = function () { KENH = Number(this.value); };
+    CK.gan($('ck'), anh);
+    $('kyLai').onclick = function () { CK.xoa(); };
+    $('gui').onclick = gui;
+  }
+
+  function gui() {
+    var loi = $('loi'); loi.textContent = '';
+    if (!($('o1').checked && $('o2').checked && $('o3').checked)) { loi.textContent = t('thieuO'); return; }
+    var sdt = $('sdt').value.trim();
+    if (sdt.replace(/\D/g, '').length < 8) { loi.textContent = t('thieuSdt'); $('sdt').focus(); return; }
+    if (!CK.du()) { loi.textContent = t('thieuKy'); return; }
+    che(true, t('dangGui'));
+    goi({ ky: 'ky', t: MA, nn: NN, da_doc: DA_DOC, ua: navigator.userAgent, sdt: sdt, lien_he: T.vi.kenh[KENH],
+          o: { dk: true, dl: true, xe: true }, chu_ky: CK.layAnh() })
+      .then(function (r) {
+        che(false);
+        if (!r.ok) {
+          if (r.ma_loi) { DL = { loi: r.ma_loi }; return ve(); }
+          loi.textContent = r.loi || t('matMang'); return;
+        }
+        KQ = r; ve(); window.scrollTo(0, 0);
+      }, function () { che(false); loi.textContent = t('matMang'); });
+  }
+
+  function veXong() {
+    var p = KQ.phieu || DL.phieu || {};
+    $('noiDung').innerHTML = '<div class="the xong"><div class="dau">✅</div><h1>' + t('xong') + '</h1>' +
+      '<p>' + e(t('xongMo').replace('{hd}', p.soHD || '').replace('{luc}', KQ.luc || '')) + '</p>' +
+      (KQ.pdf ? '<button class="chinh" id="pdf">' + t('taiPdf') + '</button>' : '') +
+      '<div class="nhac">' + t('nhac').map(function (s) { return '• ' + e(s.replace('{tra}', p.tra || '')); }).join('<br>') + '</div>' +
+      '<h2 style="margin-top:16px">' + t('nhan2') + '</h2>' + lienHe() + '</div>' + hopPhieu(p);
+    if ($('pdf')) $('pdf').onclick = taiPdf;
+    ganLienHe();
+  }
+  function taiPdf() {
+    var s = atob(KQ.pdf.b64), b = new Uint8Array(s.length);
+    for (var i = 0; i < s.length; i++) b[i] = s.charCodeAt(i);
+    var url = URL.createObjectURL(new Blob([b], { type: 'application/pdf' })), a = document.createElement('a');
+    a.href = url; a.download = KQ.pdf.ten || 'hop_dong.pdf'; document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 30000);
+  }
+  function lienHe() {
+    return '<div class="lienhe"><a href="' + ZALO + '" target="_blank" rel="noopener">Zalo</a><a href="' + WA + '" target="_blank" rel="noopener">WhatsApp</a>' +
+      '<button id="wc">WeChat</button></div><p class="mo" style="text-align:center;margin-top:8px">' + HOTLINE + ' · WeChat: ' + WECHAT + '</p>';
+  }
+  function ganLienHe() {
+    var w = $('wc'); if (!w) return;
+    w.onclick = function () { try { navigator.clipboard.writeText(WECHAT); } catch (x) {} w.textContent = t('saoChep'); };
+  }
+
+  /* ── khung ký: nét vẽ bằng ngón tay / chuột ── */
+  var CK = (function () {
+    var cv = null, ctx = null, nets = [], dang = null, dai = 0;
+    function toaDo(ev) { var r = cv.getBoundingClientRect(); return { x: ev.clientX - r.left, y: ev.clientY - r.top }; }
+    function kichThuoc() {
+      var r = cv.getBoundingClientRect(), d = Math.max(1, window.devicePixelRatio || 1);
+      cv.width = Math.round(r.width * d); cv.height = Math.round(r.height * d);
+      ctx = cv.getContext('2d'); ctx.setTransform(d, 0, 0, d, 0, 0);
+      ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = 2.6; ctx.strokeStyle = '#112233';
+      veLai();
+    }
+    function veLai() {
+      var r = cv.getBoundingClientRect(); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, r.width, r.height);
+      nets.forEach(function (n) { ctx.beginPath(); n.forEach(function (p, i) { if (i) ctx.lineTo(p.x, p.y); else ctx.moveTo(p.x, p.y); }); ctx.stroke(); });
+      var g = $('ckGoi'); if (g) g.style.display = nets.length ? 'none' : '';
+    }
+    function gan(el, anhCu) {
+      cv = el; if (!anhCu) { nets = []; dai = 0; }
+      kichThuoc();
+      cv.addEventListener('pointerdown', function (ev) { ev.preventDefault(); cv.setPointerCapture(ev.pointerId); dang = [toaDo(ev)]; nets.push(dang); veLai(); });
+      cv.addEventListener('pointermove', function (ev) {
+        if (!dang) return; ev.preventDefault();
+        var p = toaDo(ev), q = dang[dang.length - 1]; dai += Math.hypot(p.x - q.x, p.y - q.y);
+        dang.push(p); ctx.beginPath(); ctx.moveTo(q.x, q.y); ctx.lineTo(p.x, p.y); ctx.stroke();
+      });
+      ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (k) { cv.addEventListener(k, function () { dang = null; }); });
+      window.addEventListener('resize', function () { if (cv && document.body.contains(cv)) kichThuoc(); });
+    }
+    function layAnh() {
+      var r = cv.getBoundingClientRect(), w = Math.min(600, Math.round(r.width)), h = Math.round(w * r.height / r.width);
+      var c = document.createElement('canvas'); c.width = w; c.height = h;
+      var x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.drawImage(cv, 0, 0, w, h);
+      return c.toDataURL('image/png');
+    }
+    return { gan: gan, layAnh: layAnh, xoa: function () { nets = []; dai = 0; veLai(); }, du: function () { return nets.length > 0 && dai > 120; },
+             coNet: function () { return !!cv && nets.length > 0 && document.body.contains(cv); } };
+  })();
+
+  tai();
+})();
+</script>
+</body>
+</html>
