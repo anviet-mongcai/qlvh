@@ -6,7 +6,10 @@
 <meta name="theme-color" content="#12674A">
 <meta name="robots" content="noindex,nofollow">
 <title>Xác nhận thuê xe · An Việt Móng Cái</title>
-<!-- Trang ký điện tử Điều kiện thuê xe · v2.1 · 29/10/2026 · máy chủ zz_v67
+<!-- Trang ký điện tử Điều kiện thuê xe · v2.2 · 29/10/2026 · máy chủ zz_v67 + zz_v68
+     v2.2: máy chủ gửi điều khoản v34 (sau ngày hiệu lực — QĐ-D299) → ô dữ liệu «đã được thông báo» (QĐ-D296), câu ngôn ngữ
+           «khác biệt thì bản có lợi hơn cho Bên B được ưu tiên» (QĐ-D294), gửi xn = 3; điều khoản v33 → y như v2.1 (xn = 2).
+           Chữ ký Bên A có dòng «Ký điện tử · HĐ số …/HĐTX» in đè (QĐ-D298).
      v2.1: bỏ dòng ngày sinh của cả Bên A và Bên B (Anh yêu cầu 29/10/2026) — không hiện ngày sinh dù máy chủ có gửi.
      v2.0 · 28/10/2026: thông tin Bên A và Bên B cùng một khuôn, không che (Ông/Bà · Sinh ngày · CCCD/Hộ chiếu cấp ngày … tại … ·
            Nơi thường trú · SĐT liên lạc) · chữ ký Bên A in sẵn · toàn văn song ngữ (ngôn ngữ đã chọn + Tiếng Việt) ·
@@ -62,6 +65,9 @@
   .lk{background:none;border:0;color:var(--xanh);text-decoration:underline;font-size:14px;padding:6px 0}
   .ckA{display:flex;align-items:center;gap:12px;border:1px solid #E3E6EB;border-radius:10px;padding:6px 10px;margin:4px 0 12px}
   .ckA img{height:64px;width:auto;flex:0 0 auto}
+  .ckAi{position:relative;flex:0 0 auto;min-width:172px;text-align:center}
+  .ckAi img{height:72px;display:inline-block}
+  .ckAi i{position:absolute;left:0;right:0;bottom:1px;font-style:normal;font-size:10px;line-height:1.15;font-weight:700;color:#A3231C;text-align:center;white-space:nowrap}
   .ckA span{font-size:13px;color:var(--mo);line-height:1.35}
   .ckA b{color:var(--muc)}
   .khungKy{position:relative;border:2px dashed var(--vien);border-radius:12px;background:#fff;touch-action:none;margin-top:6px}
@@ -118,6 +124,7 @@
       xn: 'Xác nhận',
       o1: 'Tôi đã đọc và đồng ý <b>Điều kiện thuê xe {ban}</b> (Điều 1–9 và các xác nhận (a)–(h) Mục B).',
       o2: 'Tôi đồng ý xử lý dữ liệu cá nhân — gồm <b>dữ liệu nhạy cảm</b>: ảnh giấy tờ tùy thân và <b>vị trí xe qua định vị GPS</b> — theo Điều 8.',
+      o2_34: 'Tôi xác nhận đã được thông báo về việc xử lý dữ liệu cá nhân — gồm <b>dữ liệu nhạy cảm</b>: ảnh giấy tờ tùy thân và <b>vị trí xe qua định vị GPS</b> — để thực hiện hợp đồng theo Điều 8.',
       o3: 'Tôi đã kiểm tra xe: <b>hiện trạng, mức pin, phụ kiện</b> đúng như phiếu.',
       lienHe: 'Số điện thoại của bạn', lienHeGoi: 'Số điện thoại / ID',
       kenh: ['Zalo', 'WhatsApp', 'WeChat', 'Điện thoại'],
@@ -154,9 +161,12 @@
       docToanVan: 'Read the full rental terms', anToanVan: 'Hide full terms',
       ghiNgonNgu: 'English summary below, then the full Vietnamese text. The Vietnamese text is the binding version.',
       ghiSongNgu: 'Each paragraph: the Vietnamese text, then the English translation. The Vietnamese text is the binding version (Art. 8, 9).',
+      ghiNgonNgu_34: 'English summary below, then the full Vietnamese text. If the versions differ, the one more favourable to you (Party B) prevails (Art. 8).',
+      ghiSongNgu_34: 'Each paragraph: the Vietnamese text, then the English translation. If the versions differ, the one more favourable to you (Party B) prevails (Art. 8, 9).',
       xn: 'Confirm',
       o1: 'I have read and agree to the <b>Rental Terms {ban}</b> (Articles 1–9 and confirmations (a)–(h) in Section B).',
       o2: 'I consent to the processing of my personal data — including <b>sensitive data</b>: identity-document images and the bikes’ <b>GPS location</b> — under Article 8.',
+      o2_34: 'I confirm I have been informed of the processing of my personal data — including <b>sensitive data</b>: identity-document images and the bikes’ <b>GPS location</b> — to perform the contract under Article 8.',
       o3: 'I have checked the bike(s): <b>condition, battery level and accessories</b> match this form.',
       lienHe: 'Your contact number', lienHeGoi: 'Number / ID',
       kenh: ['Zalo', 'WhatsApp', 'WeChat', 'Phone'],
@@ -193,9 +203,12 @@
       docToanVan: '阅读租车条款全文', anToanVan: '收起全文',
       ghiNgonNgu: '下方先为中文摘要，后为越南文全文。以越南文为准。',
       ghiSongNgu: '每段先列越南文，后附中文译文。以越南文为准（第8、9条）。',
+      ghiNgonNgu_34: '下方先为中文摘要，后为越南文全文。各版本不一致时，适用对您（乙方）更有利的版本（第8条）。',
+      ghiSongNgu_34: '每段先列越南文，后附中文译文。各版本不一致时，适用对您（乙方）更有利的版本（第8、9条）。',
       xn: '确认',
       o1: '本人已阅读并同意<b>《租车条件 {ban}》</b>（第1–9条及B部分 (a)–(h) 各项确认）。',
       o2: '本人同意按第8条处理个人资料——包括<b>敏感数据</b>：身份证件图像及车辆<b>GPS定位位置</b>。',
+      o2_34: '本人确认已获告知：为履行合同，依第8条处理本人个人资料——包括<b>敏感数据</b>：身份证件图像及车辆<b>GPS定位位置</b>。',
       o3: '本人已检查车辆：<b>车况、电量、配件</b>与本单一致。',
       lienHe: '您的联系电话', lienHeGoi: '号码 / ID',
       kenh: ['Zalo', 'WhatsApp', '微信', '电话'],
@@ -220,6 +233,9 @@
   var $ = function (id) { return document.getElementById(id); };
   var e = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
   function t(k) { return T[NN][k]; }
+  /** Điều khoản v34 trở lên (zz_v68 sau ngày hiệu lực): dùng nhãn «…_34» nếu có. */
+  function la34(dk) { var m = String((dk && dk.ban) || '').match(/^v(\d+)/); return !!m && Number(m[1]) >= 34; }
+  function tv(k, dk) { return la34(dk) && T[NN][k + '_34'] !== undefined ? T[NN][k + '_34'] : T[NN][k]; }
   /** Nhãn phần hợp đồng: Tiếng Việt + ngôn ngữ đã chọn. */
   function L(k) { return NN === 'vi' ? T.vi[k] : T.vi[k] + ' / ' + T[NN][k]; }
 
@@ -328,11 +344,11 @@
   function toanVan(dk) {
     var dich = NN !== 'vi' && dk.dich && dk.dich[NN] && dk.dich[NN].length === dk.vi.length ? dk.dich[NN] : null;
     if (dich) {
-      return '<p class="ghi">' + e(t('ghiSongNgu')) + '</p>' +
+      return '<p class="ghi">' + e(tv('ghiSongNgu', dk)) + '</p>' +
         '<p><b>' + e(dk.tieu_de) + '</b><br><i>' + e((dk.dich.tieu_de || {})[NN] || '') + '</i></p>' +
         dk.vi.map(function (s, i) { return '<p>' + e(s) + '</p><p class="dich">' + e(dich[i]) + '</p>'; }).join('');
     }
-    return (NN === 'vi' ? '' : '<p class="ghi">' + e(t('ghiNgonNgu')) + '</p>' +
+    return (NN === 'vi' ? '' : '<p class="ghi">' + e(tv('ghiNgonNgu', dk)) + '</p>' +
         (NN === 'en' ? dk.en_tom : dk.zh_tom).map(function (s) { return '<p>' + e(s) + '</p>'; }).join('') + '<hr>') +
       '<p><b>' + e(dk.tieu_de) + '</b></p>' + dk.vi.map(function (s) { return '<p>' + e(s) + '</p>'; }).join('');
   }
@@ -348,14 +364,15 @@
           t('kenh').map(function (k, i) { return '<option value="' + i + '"' + (i === KENH ? ' selected' : '') + '>' + e(k) + '</option>'; }).join('') +
         '</select><input class="o-nhap" id="sdt" type="tel" inputmode="tel" autocomplete="tel" placeholder="' + e(t('lienHeGoi')) + '"></div>' +
         (san ? '<button class="lk" id="doiSo">' + e(t('dungSoCu')) + ' (' + e(san) + ')</button>' : '');
-    var ckA = DL.a_ky ? '<div class="ckA"><img src="' + DL.a_ky + '" alt=""><span><b>' + e(L('ckA')) + '</b><br>' + e(t('ckAGhi')) + '</span></div>' : '';
+    var ckA = DL.a_ky ? '<div class="ckA"><div class="ckAi"><img src="' + DL.a_ky + '" alt=""><i>Ký điện tử · HĐ số ' + e(p.soHD) + '/HĐTX</i></div>' +
+      '<span><b>' + e(L('ckA')) + '</b><br>' + e(t('ckAGhi')) + '</span></div>' : '';
     nd.innerHTML = hopPhieu(p) +
       '<div class="the"><h2>' + t('bb') + '</h2><ul class="bb">' + t('bbDs').map(function (s) { return '<li>' + e(s) + '</li>'; }).join('') + '</ul>' +
       '<button class="nut2" id="moQD">' + e(t('xemQD')) + '</button><div class="qd" id="qdKhung"></div>' +
       '<button class="nut2" id="moTV">' + t('docToanVan') + ' ' + e(dk.ban) + '</button><div id="toanVan">' + toanVan(dk) + '</div></div>' +
       '<div class="the"><h2>' + t('xn') + '</h2>' +
       '<label class="o"><input type="checkbox" id="o1"><span>' + t('o1').replace('{ban}', e(dk.ban)) + '</span></label>' +
-      '<label class="o"><input type="checkbox" id="o2"><span>' + t('o2') + '</span></label>' +
+      '<label class="o"><input type="checkbox" id="o2"><span>' + tv('o2', dk) + '</span></label>' +
       '<label class="o"><input type="checkbox" id="o3"><span>' + t('o3') + '</span></label></div>' +
       '<div class="the"><h2>' + t('lienHe') + '</h2>' + khoiSdt + '</div>' +
       '<div class="the"><h2>' + t('kyTen') + '</h2>' + ckA + '<div class="mo">' + e(t('ckB')) + '</div>' +
@@ -392,7 +409,7 @@
     if (!CK.du()) { loi.textContent = t('thieuKy'); return; }
     che(true, t('dangGui'));
     goi({ ky: 'ky', t: MA, nn: NN, da_doc: DA_DOC, ua: navigator.userAgent, sdt: sdt,
-          lien_he: dungSan ? 'Ghi sẵn trên app' : T.vi.kenh[KENH], sdt_san: dungSan, xn: 2,
+          lien_he: dungSan ? 'Ghi sẵn trên app' : T.vi.kenh[KENH], sdt_san: dungSan, xn: la34(DL.dk) ? 3 : 2,
           o: { dk: true, dl: true, xe: true }, chu_ky: CK.layAnh() })
       .then(function (r) {
         che(false);
