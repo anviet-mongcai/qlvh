@@ -6,8 +6,9 @@
 <meta name="theme-color" content="#12674A">
 <meta name="robots" content="noindex,nofollow">
 <title>Xác nhận thuê xe · An Việt Móng Cái</title>
-<!-- Trang ký điện tử Điều kiện thuê xe · v2.0 · 28/10/2026 · máy chủ zz_v67
-     v2.0: thông tin Bên A và Bên B cùng một khuôn, không che (Ông/Bà · Sinh ngày · CCCD/Hộ chiếu cấp ngày … tại … ·
+<!-- Trang ký điện tử Điều kiện thuê xe · v2.1 · 29/10/2026 · máy chủ zz_v67
+     v2.1: bỏ dòng ngày sinh của cả Bên A và Bên B (Anh yêu cầu 29/10/2026) — không hiện ngày sinh dù máy chủ có gửi.
+     v2.0 · 28/10/2026: thông tin Bên A và Bên B cùng một khuôn, không che (Ông/Bà · Sinh ngày · CCCD/Hộ chiếu cấp ngày … tại … ·
            Nơi thường trú · SĐT liên lạc) · chữ ký Bên A in sẵn · toàn văn song ngữ (ngôn ngữ đã chọn + Tiếng Việt) ·
            SĐT đã ghi trên app thì khách khỏi gõ lại · ô đồng ý dữ liệu nêu rõ dữ liệu nhạy cảm · thẻ Quy định v30 xem trước
            và sau khi ký (PDF hợp đồng kèm phụ lục Quy định).
@@ -100,7 +101,7 @@
       nhan: 'Nhận xe', tra: 'Hạn trả', tienThue: 'Tiền thuê', coc: 'Ký cược', pin: 'Pin lúc giao', goi: 'Gói',
       quaGio: 'Quá giờ', sac: 'Bộ sạc kèm xe', co: 'Có', khong: 'Không', tong: 'Tổng',
       ben2: 'Thông tin hai bên', benA2: 'BÊN A — BÊN CHO THUÊ', benB2: 'BÊN B — BÊN THUÊ',
-      ongBa: 'Ông (Bà)', sinhNgay: 'Sinh ngày', sinhNam: 'Năm sinh', giayTo: 'CCCD / Hộ chiếu', capNgay: 'cấp ngày', taiCQ: 'tại',
+      ongBa: 'Ông (Bà)', giayTo: 'CCCD / Hộ chiếu', capNgay: 'cấp ngày', taiCQ: 'tại',
       thuongTru: 'Nơi thường trú', sdt: 'SĐT liên lạc', quocTich: 'Quốc tịch', luuTru: 'Nơi lưu trú tại Việt Nam',
       xeGio: 'Xe thuê và thời gian', giaoTra: 'Giao / trả xe tại', diaHen: 'Địa điểm Bên A hẹn',
       bb: '6 điều bắt buộc',
@@ -138,7 +139,7 @@
       nhan: 'Pick-up', tra: 'Return by', tienThue: 'Rental', coc: 'Deposit', pin: 'Battery at hand-over', goi: 'Package',
       quaGio: 'Late fee', sac: 'Charger included', co: 'Yes', khong: 'No', tong: 'Total',
       ben2: 'The parties', benA2: 'PARTY A — OWNER', benB2: 'PARTY B — RENTER',
-      ongBa: 'Mr / Ms', sinhNgay: 'Date of birth', sinhNam: 'Year of birth', giayTo: 'ID card / Passport', capNgay: 'issued on', taiCQ: 'by',
+      ongBa: 'Mr / Ms', giayTo: 'ID card / Passport', capNgay: 'issued on', taiCQ: 'by',
       thuongTru: 'Permanent address', sdt: 'Contact phone', quocTich: 'Nationality', luuTru: 'Accommodation in Vietnam',
       xeGio: 'Bikes and times', giaoTra: 'Hand-over / return place', diaHen: 'Place appointed by the owner',
       bb: '6 must-know rules',
@@ -177,7 +178,7 @@
       nhan: '取车', tra: '还车期限', tienThue: '租金', coc: '押金', pin: '交车电量', goi: '套餐',
       quaGio: '超时费', sac: '随车充电器', co: '有', khong: '无', tong: '合计',
       ben2: '双方信息', benA2: '甲方——出租方', benB2: '乙方——承租方',
-      ongBa: '先生/女士', sinhNgay: '出生日期', sinhNam: '出生年份', giayTo: '身份证/护照', capNgay: '签发日期', taiCQ: '签发机关',
+      ongBa: '先生/女士', giayTo: '身份证/护照', capNgay: '签发日期', taiCQ: '签发机关',
       thuongTru: '常住地址', sdt: '联系电话', quocTich: '国籍', luuTru: '在越南的住宿地址',
       xeGio: '租赁车辆及时间', giaoTra: '交车/还车地点', diaHen: '车主约定的地点',
       bb: '6条必须遵守的规定',
@@ -259,17 +260,16 @@
     veForm();
   }
 
-  /* ── thông tin hai bên: Bên A và Bên B cùng một khuôn, không che ── */
+  /* ── thông tin hai bên: Bên A và Bên B cùng một khuôn, không che, không có ngày sinh (29/10/2026) ── */
   function kv(k, v) {
     return '<div class="kv"><span class="k">' + k + '</span>' + (v ? '<span class="v">' + e(v) + '</span>' : '<span class="v trong">…</span>') + '</div>';
   }
   /** gon = máy chủ cũ (chưa có trường mới): bỏ các dòng trống thay vì hiện «…». */
   function khoiBen(tieuDe, o, them, gon) {
-    var ns = String(o.ns || ''), cham = '…', h = function (k, v) { return gon && !v ? '' : kv(k, v); };
+    var cham = '…', h = function (k, v) { return gon && !v ? '' : kv(k, v); };
     var gt = gon ? (o.gt || '') : (o.gt || cham) + ' — ' + L('capNgay') + ' ' + (o.ngay_cap || cham) + ' — ' + L('taiCQ') + ' ' + (o.noi_cap || cham);
     return '<div class="ben"><div class="bt">' + tieuDe + '</div>' +
       h(L('ongBa'), o.ten ? String(o.ten).toUpperCase() : '') +
-      h(ns.length === 4 ? L('sinhNam') : L('sinhNgay'), ns) +
       h(L('giayTo'), gt) +
       h(L('thuongTru'), o.thuong_tru) +
       h(L('sdt'), o.sdt) + (them || '') + '</div>';
@@ -281,7 +281,7 @@
   }
   function soSan(p) { var s = String((p && p.sdt_so) || '').trim(); return s.replace(/\D/g, '').length >= 8 ? s : ''; }
   function benB(p) {
-    return { ten: p.ten, ns: p.ns || '', gt: p.giay_to, ngay_cap: p.ngay_cap, noi_cap: p.noi_cap,
+    return { ten: p.ten, gt: p.giay_to, ngay_cap: p.ngay_cap, noi_cap: p.noi_cap,
              thuong_tru: p.thuong_tru, sdt: soSan(p) || (KQ && KQ.sdt) || '' };
   }
   function haiBen(p) {
