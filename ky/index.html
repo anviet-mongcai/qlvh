@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#12674A">
 <meta name="robots" content="noindex,nofollow">
 <title>Xác nhận thuê xe · An Việt Móng Cái</title>
-<!-- Trang ký điện tử Điều kiện thuê xe · v2.4 · 03/11/2026 (thiết bị thật) · v2.3 · 30/10/2026 · máy chủ zz_v67 + zz_v68
+<!-- Trang ký điện tử Điều kiện thuê xe · v2.5 · 03/11/2026 (QĐ-D307: phải mở toàn văn mới tick được ô 1) · v2.4 (thiết bị thật) · v2.3 · 30/10/2026 · máy chủ zz_v67 + zz_v68
      v2.3: điều khoản v34 → thẻ «Hướng dẫn sử dụng xe v31» (QĐ-D303 a: tóm tắt, không thêm nghĩa vụ — ảnh qd/HUONG_DAN_v31_*.jpg),
            dòng định vị «chỉ xác định vị trí, không nghe, không ghi âm» (QĐ-D302 a); điều khoản v33 → thẻ QUY ĐỊNH v30 như v2.2.
      v2.2: máy chủ gửi điều khoản v34 (sau ngày hiệu lực — QĐ-D299) → ô dữ liệu «đã được thông báo» (QĐ-D296), câu ngôn ngữ
@@ -142,7 +142,7 @@
       kyTen: 'Ký tên', ckA: 'Chữ ký Bên A', ckAGhi: 'ký sẵn trên hệ thống của Bên A', ckB: 'Chữ ký Bên B — ký bằng ngón tay vào khung',
       kyGoi: 'Ký bằng ngón tay vào đây', kyLai: 'Ký lại',
       nut: 'XÁC NHẬN THUÊ XE', dangGui: 'Đang ghi nhận…',
-      thieuO: 'Chưa đánh dấu đủ 3 ô xác nhận.', thieuSdt: 'Chưa nhập số liên hệ (ít nhất 8 chữ số).', thieuKy: 'Chữ ký quá ngắn — ký lại.',
+      thieuO: 'Chưa đánh dấu đủ 3 ô xác nhận.', canMo: 'Bấm «Đọc toàn văn Điều kiện thuê xe» ở trên trước — sau đó mới đánh dấu được ô này.', thieuSdt: 'Chưa nhập số liên hệ (ít nhất 8 chữ số).', thieuKy: 'Chữ ký quá ngắn — ký lại.',
       matMang: 'Chưa gửi được — kiểm tra mạng rồi bấm lại. Chữ ký và các ô đã đánh dấu vẫn giữ nguyên.',
       xong: 'ĐÃ XÁC NHẬN', xongMo: 'Hợp đồng {hd} đã giao kết lúc {luc}.', taiPdf: 'Tải bản hợp đồng (PDF)',
       pdfKem: 'File PDF gồm: hợp đồng, chữ ký hai bên, toàn văn Điều kiện thuê xe và phụ lục Quy định sử dụng xe.',
@@ -193,7 +193,7 @@
       kyTen: 'Signatures', ckA: 'Signature of Party A', ckAGhi: 'pre-applied by Party A’s system', ckB: 'Signature of Party B — sign with your finger in the box',
       kyGoi: 'Sign here with your finger', kyLai: 'Clear',
       nut: 'CONFIRM RENTAL', dangGui: 'Recording…',
-      thieuO: 'Please tick all 3 boxes.', thieuSdt: 'Please enter a contact number (at least 8 digits).', thieuKy: 'Signature too short — please sign again.',
+      thieuO: 'Please tick all 3 boxes.', canMo: 'Tap «Read the full rental terms» above first — then you can tick this box.', thieuSdt: 'Please enter a contact number (at least 8 digits).', thieuKy: 'Signature too short — please sign again.',
       matMang: 'Not sent — check your connection and tap again. Your signature and ticks are kept.',
       xong: 'CONFIRMED', xongMo: 'Contract {hd} was concluded at {luc}.', taiPdf: 'Download contract (PDF)',
       pdfKem: 'The PDF contains: the bilingual contract, both signatures, the full rental terms and the Bike Use Rules annex.',
@@ -244,7 +244,7 @@
       kyTen: '签名', ckA: '甲方签名', ckAGhi: '由甲方系统预先签署', ckB: '乙方签名——请用手指在框内签名',
       kyGoi: '请用手指在此签名', kyLai: '重签',
       nut: '确认租车', dangGui: '正在记录…',
-      thieuO: '请勾选全部3项。', thieuSdt: '请填写联系号码（至少8位数字）。', thieuKy: '签名过短，请重签。',
+      thieuO: '请勾选全部3项。', canMo: '请先点击上方「阅读租车条款全文」，然后才能勾选此项。', thieuSdt: '请填写联系号码（至少8位数字）。', thieuKy: '签名过短，请重签。',
       matMang: '未发送成功——请检查网络后再点一次。签名和勾选已保留。',
       xong: '已确认', xongMo: '合同 {hd} 已于 {luc} 订立。', taiPdf: '下载合同（PDF）',
       pdfKem: 'PDF文件包含：双语合同、双方签名、租车条件全文及《车辆使用规定》附件。',
@@ -413,7 +413,8 @@
       '<button class="nut2" id="moQD">' + e(tv('xemQD', dk)) + '</button><div class="qd" id="qdKhung"></div>' +
       '<button class="nut2" id="moTV">' + t('docToanVan') + ' ' + e(dk.ban) + '</button><div id="toanVan">' + toanVan(dk) + '</div></div>' +
       '<div class="the"><h2>' + t('xn') + '</h2>' +
-      '<label class="o"><input type="checkbox" id="o1"><span>' + t('o1').replace('{ban}', e(dk.ban)) + '</span></label>' +
+      '<label class="o"><input type="checkbox" id="o1"' + (DA_DOC ? '' : ' disabled') + '><span>' + t('o1').replace('{ban}', e(dk.ban)) + '</span></label>' +
+      (DA_DOC ? '' : '<div class="loi" id="o1Goi" style="margin:-4px 0 8px">' + e(t('canMo')) + '</div>') +
       '<label class="o"><input type="checkbox" id="o2"><span>' + tv('o2', dk) + '</span></label>' +
       '<label class="o"><input type="checkbox" id="o3"><span>' + t('o3') + '</span></label></div>' +
       '<div class="the"><h2>' + t('lienHe') + '</h2>' + khoiSdt + '</div>' +
@@ -421,7 +422,7 @@
       '<div class="khungKy"><canvas id="ck"></canvas><div class="goi" id="ckGoi">' + t('kyGoi') + '</div></div>' +
       '<button class="kyLai" id="kyLai">' + t('kyLai') + '</button>' +
       '<button class="chinh" id="gui">' + t('nut') + '</button><div class="loi" id="loi"></div></div>';
-    $('o1').checked = !!giu.o1; $('o2').checked = !!giu.o2; $('o3').checked = !!giu.o3;
+    $('o1').checked = DA_DOC && !!giu.o1; $('o2').checked = !!giu.o2; $('o3').checked = !!giu.o3;
     if ($('sdt')) $('sdt').value = giu.sdt || '';
     if ($('doiSo')) $('doiSo').onclick = function () { DOI_SO = !DOI_SO; veForm(); if ($('sdt')) $('sdt').focus(); };
     $('moQD').onclick = function () {
@@ -434,7 +435,7 @@
       var m = $('toanVan').style.display !== 'block';
       $('toanVan').style.display = m ? 'block' : 'none';
       this.textContent = (m ? t('anToanVan') : t('docToanVan') + ' ' + dk.ban);
-      if (m) DA_DOC = true;
+      if (m) { DA_DOC = true; $('o1').disabled = false; if ($('o1Goi')) $('o1Goi').style.display = 'none'; }   // QĐ-D306→D307: ô 1 chỉ mở sau khi đã mở toàn văn
     };
     if ($('kenh')) $('kenh').onchange = function () { KENH = Number(this.value); };
     CK.gan($('ck'), anh);
@@ -444,6 +445,7 @@
 
   function gui() {
     var loi = $('loi'); loi.textContent = '';
+    if (!DA_DOC) { loi.textContent = t('canMo'); return; }
     if (!($('o1').checked && $('o2').checked && $('o3').checked)) { loi.textContent = t('thieuO'); return; }
     var san = soSan(DL.phieu), dungSan = !!(san && !DOI_SO);
     var sdt = dungSan ? san : $('sdt').value.trim();
