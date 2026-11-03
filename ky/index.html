@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#12674A">
 <meta name="robots" content="noindex,nofollow">
 <title>Xác nhận thuê xe · An Việt Móng Cái</title>
-<!-- Trang ký điện tử Điều kiện thuê xe · v2.3 · 30/10/2026 · máy chủ zz_v67 + zz_v68
+<!-- Trang ký điện tử Điều kiện thuê xe · v2.4 · 03/11/2026 (thiết bị thật) · v2.3 · 30/10/2026 · máy chủ zz_v67 + zz_v68
      v2.3: điều khoản v34 → thẻ «Hướng dẫn sử dụng xe v31» (QĐ-D303 a: tóm tắt, không thêm nghĩa vụ — ảnh qd/HUONG_DAN_v31_*.jpg),
            dòng định vị «chỉ xác định vị trí, không nghe, không ghi âm» (QĐ-D302 a); điều khoản v33 → thẻ QUY ĐỊNH v30 như v2.2.
      v2.2: máy chủ gửi điều khoản v34 (sau ngày hiệu lực — QĐ-D299) → ô dữ liệu «đã được thông báo» (QĐ-D296), câu ngôn ngữ
@@ -259,6 +259,18 @@
   var tham = new URLSearchParams(location.search), MA = (tham.get('t') || '').trim();
   var NN = (function () { var l = (navigator.language || 'vi').toLowerCase(); return l.indexOf('zh') === 0 ? 'zh' : l.indexOf('vi') === 0 ? 'vi' : 'en'; })();
   var DL = null, KQ = null, DA_DOC = false, KENH = 0, DOI_SO = false;
+  /* v2.4 03/11/2026: Chrome/Samsung rút gọn userAgent thành «Android 10; K» cố định → ghi thêm dòng máy + bản Android thật (Client Hints) */
+  var UA = navigator.userAgent;
+  try {
+    if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
+      navigator.userAgentData.getHighEntropyValues(['model', 'platformVersion', 'fullVersionList']).then(function (v) {
+        var ten = (v.fullVersionList || v.brands || []).filter(function (b) { return !/Not.?A.?Brand/i.test(b.brand); })
+          .map(function (b) { return b.brand + ' ' + b.version; }).join(', ');
+        UA = 'Máy: ' + (v.model || '?') + ' · ' + (v.platform || navigator.userAgentData.platform || '') + ' ' + (v.platformVersion || '') +
+             (ten ? ' · ' + ten : '') + ' | ' + navigator.userAgent;
+      }).catch(function () {});
+    }
+  } catch (e) {}
   var $ = function (id) { return document.getElementById(id); };
   var e = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
   function t(k) { return T[NN][k]; }
@@ -438,7 +450,7 @@
     if (sdt.replace(/\D/g, '').length < 8) { loi.textContent = t('thieuSdt'); if ($('sdt')) $('sdt').focus(); return; }
     if (!CK.du()) { loi.textContent = t('thieuKy'); return; }
     che(true, t('dangGui'));
-    goi({ ky: 'ky', t: MA, nn: NN, da_doc: DA_DOC, ua: navigator.userAgent, sdt: sdt,
+    goi({ ky: 'ky', t: MA, nn: NN, da_doc: DA_DOC, ua: UA, sdt: sdt,
           lien_he: dungSan ? 'Ghi sẵn trên app' : T.vi.kenh[KENH], sdt_san: dungSan, xn: la34(DL.dk) ? 3 : 2,
           o: { dk: true, dl: true, xe: true }, chu_ky: CK.layAnh() })
       .then(function (r) {
