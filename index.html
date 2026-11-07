@@ -18,7 +18,11 @@
   .mo{color:#5B6372;font-size:14px;margin-top:10px}
   .loi{color:#A3231C}
 </style>
-<!-- QLVH · app cài điện thoại (PWA) · v1.1 · 07/10/2026 · QĐ-D165 (B)
+<!-- QLVH · app cài điện thoại (PWA) · v1.2 · 07/11/2026 · QĐ-D317 (a) · QĐ-D318 (a) · QĐ-D319 (a)
+     v1.2: KHOÁ APP — mỗi lần mở / quay lại sau ≥ 1 phút / ngay sau «Khách ký trên máy này» phải mở bằng vân tay·khuôn mặt
+           (WebAuthn của điện thoại) hoặc PIN 6 số. Máy chưa cài app (chưa có mã) mở /qlvh/ → về trang chủ web;
+           màn Cài đặt chỉ mở bằng /qlvh/?caidat (lưu mã mới = đặt lại khoá).
+     v1.1 · 07/10/2026 · QĐ-D165 (B)
      Khung này chỉ lo: lưu giao diện + số liệu lần trước trong máy, hiện ngay khi mở,
      rồi gọi cổng Apps Script (zz_v54) lấy số mới. Giao diện thật = Index.html của app hiện có. -->
 </head>
@@ -29,15 +33,17 @@ function QLVH_BAT_DAU() {
   'use strict';
   var CSS = "html,body{margin:0;background:#E9ECF0;font:16px ui-sans-serif,-apple-system,\"Segoe UI\",Roboto,Arial,sans-serif;color:#16181D} .hop{max-width:420px;margin:0 auto;padding:24px 16px} h1{font-size:20px;margin:0 0 12px} label{display:block;margin:14px 0 6px;font-weight:600} input{width:100%;box-sizing:border-box;font-size:16px;padding:12px;border:1px solid #C9CFD8;border-radius:10px} button{margin-top:18px;width:100%;font-size:17px;padding:14px;border:0;border-radius:12px;background:#12674A;color:#fff} .mo{color:#5B6372;font-size:14px;margin-top:10px} .loi{color:#A3231C}";
   var CONG_MAC_DINH = 'https://script.google.com/macros/s/AKfycbyYcei_p4LostxboXINvDDUVjRvmJdkelJ6GvOVzQBlQYDzWzV5ZwSZNcxbI6Rpdyd2/exec';   // link cổng (không phải mã bí mật)
-  var K = { cfg: 'pwa_cfg', ui: 'pwa_ui', uima: 'pwa_ui_ma', dl: 'pwa_dl', qt: 'pwa_qt' };
+  var K = { cfg: 'pwa_cfg', ui: 'pwa_ui', uima: 'pwa_ui_ma', dl: 'pwa_dl', qt: 'pwa_qt', khoa: 'pwa_khoa' };
+  var KHOA_SAU_MS = 60000;                       // QĐ-D319 (a): quay lại sau ≥ 1 phút thì khoá
   function doc(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function luu(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
   function docJ(k) { try { return JSON.parse(doc(k) || 'null'); } catch (e) { return null; } }
 
   if ('serviceWorker' in navigator) { try { navigator.serviceWorker.register('sw.js'); } catch (e) {} }
 
-  var cfg = docJ(K.cfg);
-  if (!cfg || !cfg.url || !cfg.k || /[?&]caidat\b/.test(location.search)) { caiDat(cfg); return; }
+  var cfg = docJ(K.cfg), laCaiDat = /[?&]caidat\b/.test(location.search);
+  if (laCaiDat) { caiDat(cfg); return; }
+  if (!cfg || !cfg.url || !cfg.k) { location.replace('/'); return; }      // QĐ-D317 C: máy lạ → trang chủ web
 
   /* ── gọi cổng ── */
   function goi(fn, args, them) {
@@ -70,7 +76,12 @@ function QLVH_BAT_DAU() {
   window.google = { script: { run: taoRun(null, null, undefined) } };
   window.__PWA = { goi: goi, caiDat: function () { caiDat(cfg); } };
 
-  /* ── mở app ── */
+  /* ── mở app (sau khi mở khoá) ── */
+  var daMoApp = false;
+  khoaManHinh(true, moApp);
+
+  function moApp() {
+  if (daMoApp) return; daMoApp = true;
   var ui = doc(K.ui), dl = docJ(K.dl), qt = docJ(K.qt);
   if (ui && dl) {
     hien(ui, dl, qt, true);
@@ -84,6 +95,7 @@ function QLVH_BAT_DAU() {
       if (e.saiMa) return caiDat(cfg, e.message);
       $('trangThai').innerHTML = '<span class="loi">Không mở được: ' + e.message + '</span><br>Kiểm tra mạng rồi mở lại.';
     });
+  }
   }
 
   function luuKhoiDong(r) {
@@ -102,6 +114,7 @@ function QLVH_BAT_DAU() {
     var i = html.indexOf('<head>');
     html = i > -1 ? html.slice(0, i + 6) + them + html.slice(i + 6) : them + html;
     document.open(); document.write(html); document.close();
+    ganTheoDoiKhoa();
     if (khoa) khoaLai('Số lúc ' + ((dl && dl.bay_gio) || '').replace('T', ' ') + ' — đang cập nhật số mới…', false);
   }
 
@@ -135,6 +148,146 @@ function QLVH_BAT_DAU() {
 
   function $(id) { return document.getElementById(id); }
 
+  /* ══════════ KHOÁ APP · QĐ-D317 B · D318 (a) vân tay/khuôn mặt + PIN 6 số · D319 (a) ══════════
+     Khoá chỉ chặn người cầm máy (khách ký trên máy Bên A). Mã bí mật cổng vẫn là lớp bảo vệ số liệu. */
+  var dangKhoa = false, anLuc = 0, khoaNgay = false;
+
+  function kDoc() { return docJ(K.khoa); }
+  function kLuu(o) { luu(K.khoa, JSON.stringify(o)); }
+  function b64(buf) { var s = '', a = new Uint8Array(buf); for (var i = 0; i < a.length; i++) s += String.fromCharCode(a[i]); return btoa(s); }
+  function unb64(s) { var b = atob(s), a = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return a; }
+  function ngauNhien(n) { var a = new Uint8Array(n); crypto.getRandomValues(a); return a; }
+  function bam(salt, pin) {
+    return crypto.subtle.digest('SHA-256', new TextEncoder().encode(salt + ':' + pin)).then(function (h) { return b64(h); });
+  }
+  function coSinhTrac() {
+    try {
+      if (!window.PublicKeyCredential || !PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable) return Promise.resolve(false);
+      return PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable().catch(function () { return false; });
+    } catch (e) { return Promise.resolve(false); }
+  }
+
+  /* Lớp khoá nằm trong shadow DOM: không lẫn CSS của Index.html; phần app phía sau đặt inert. */
+  function lop() {
+    var host = document.getElementById('qlvhKhoa');
+    if (!host) {
+      host = document.createElement('div'); host.id = 'qlvhKhoa';
+      host.setAttribute('style', 'position:fixed;inset:0;z-index:2147483647;background:#E9ECF0;overflow:auto');
+      (document.body || document.documentElement).appendChild(host);
+      host.attachShadow({ mode: 'open' });
+    }
+    Array.prototype.forEach.call(document.body ? document.body.children : [], function (el) { if (el !== host) el.setAttribute('inert', ''); });
+    return host;
+  }
+  function boLop() {
+    var host = document.getElementById('qlvhKhoa'); if (host) host.parentNode.removeChild(host);
+    Array.prototype.forEach.call(document.body ? document.body.children : [], function (el) { el.removeAttribute('inert'); });
+  }
+  function ve(host, html) {
+    host.shadowRoot.innerHTML = '<style>' + CSS + ' .hop{padding-top:56px} .pin{letter-spacing:8px;text-align:center;font-size:24px}' +
+      ' .phu{background:#fff;color:#12674A;border:1px solid #12674A} .nho{font-size:13px;color:#5B6372;margin-top:16px;line-height:1.5}</style>' +
+      '<div class="hop">' + html + '</div>';
+    return function (id) { return host.shadowRoot.getElementById(id); };
+  }
+
+  /** dauTien = lúc mở app (chưa có giao diện) · xong = gọi khi mở khoá */
+  function khoaManHinh(dauTien, xong) {
+    dangKhoa = true;
+    var k = kDoc();
+    if (!k || !k.pin) return datKhoa(xong);
+    var host = lop();
+    var g = ve(host, '<h1>🔒 QLVH đã khoá</h1>' +
+      '<button id="vt" style="display:none">Mở bằng vân tay / khuôn mặt</button>' +
+      '<label for="p">PIN 6 số</label><input id="p" class="pin" type="password" inputmode="numeric" maxlength="6" autocomplete="off">' +
+      '<button id="ok" class="phu">Mở bằng PIN</button><div id="tb" class="mo"></div>' +
+      '<div class="nho">Quên PIN: mở <b>' + location.origin + location.pathname + '?caidat</b>, nhập lại mã bí mật → đặt PIN mới.</div>');
+    function mo() { dangKhoa = false; khoaNgay = false; var k2 = kDoc(); if (k2) { k2.sai = 0; k2.cho = 0; kLuu(k2); } boLop(); if (xong) xong(); }
+    function choCon() { var k2 = kDoc() || {}; return Math.max(0, (k2.cho || 0) - Date.now()); }
+    function thuPin() {
+      var w = choCon();
+      if (w) { g('tb').innerHTML = '<span class="loi">Sai nhiều lần — chờ ' + Math.ceil(w / 1000) + ' giây.</span>'; return; }
+      var p = g('p').value.trim();
+      if (!/^\d{6}$/.test(p)) { g('tb').innerHTML = '<span class="loi">PIN gồm 6 chữ số.</span>'; return; }
+      var k2 = kDoc();
+      bam(k2.salt, p).then(function (h) {
+        if (h === k2.pin) return mo();
+        k2.sai = (k2.sai || 0) + 1;
+        if (k2.sai >= 5) k2.cho = Date.now() + Math.min(900000, 30000 * Math.pow(2, k2.sai - 5));
+        kLuu(k2); g('p').value = '';
+        g('tb').innerHTML = '<span class="loi">Sai PIN (' + k2.sai + ' lần).</span>';
+      });
+    }
+    function thuVanTay() {
+      var k2 = kDoc();
+      navigator.credentials.get({ publicKey: { challenge: ngauNhien(32), timeout: 60000, userVerification: 'required',
+        allowCredentials: [{ type: 'public-key', id: unb64(k2.cred) }] } })
+        .then(function (c) { if (c) mo(); }, function () { g('tb').textContent = 'Chưa mở được bằng vân tay — bấm lại hoặc dùng PIN.'; });
+    }
+    g('ok').onclick = thuPin;
+    g('p').onkeydown = function (ev) { if (ev.key === 'Enter') thuPin(); };
+    if (k.cred) coSinhTrac().then(function (co) {
+      if (!co) return;
+      g('vt').style.display = 'block'; g('vt').onclick = thuVanTay;
+      if (document.visibilityState === 'visible') thuVanTay();
+    });
+  }
+
+  /** Lần đầu sau cập nhật (hoặc sau khi lưu mã mới): đặt PIN, rồi bật vân tay nếu máy có. */
+  function datKhoa(xong) {
+    var host = lop();
+    var g = ve(host, '<h1>Đặt khoá app QLVH</h1>' +
+      '<div class="mo">Khách ký trên máy này không mở được app nếu không có vân tay / PIN của Anh.</div>' +
+      '<label for="p1">PIN 6 số</label><input id="p1" class="pin" type="password" inputmode="numeric" maxlength="6" autocomplete="off">' +
+      '<label for="p2">Nhập lại PIN</label><input id="p2" class="pin" type="password" inputmode="numeric" maxlength="6" autocomplete="off">' +
+      '<button id="ok">Lưu PIN</button><div id="tb" class="mo"></div>');
+    g('ok').onclick = function () {
+      var a = g('p1').value.trim(), b = g('p2').value.trim();
+      if (!/^\d{6}$/.test(a)) { g('tb').innerHTML = '<span class="loi">PIN gồm đúng 6 chữ số.</span>'; return; }
+      if (a !== b) { g('tb').innerHTML = '<span class="loi">Hai lần nhập không khớp.</span>'; return; }
+      if (/^(\d)\1{5}$/.test(a) || a === '123456' || a === '654321') { g('tb').innerHTML = '<span class="loi">PIN dễ đoán — chọn số khác.</span>'; return; }
+      var salt = b64(ngauNhien(16));
+      bam(salt, a).then(function (h) {
+        kLuu({ v: 1, salt: salt, pin: h, cred: '', sai: 0, cho: 0 });
+        coSinhTrac().then(function (co) { if (co) hoiVanTay(); else xongDat(); });
+      });
+    };
+    function hoiVanTay() {
+      g = ve(host, '<h1>Mở bằng vân tay / khuôn mặt?</h1><div class="mo">Dùng vân tay hoặc khuôn mặt đã cài trên điện thoại. PIN vẫn dùng được khi cần.</div>' +
+        '<button id="bat">Bật vân tay / khuôn mặt</button><button id="bo" class="phu">Để sau — chỉ dùng PIN</button><div id="tb" class="mo"></div>');
+      g('bo').onclick = xongDat;
+      g('bat').onclick = function () {
+        navigator.credentials.create({ publicKey: {
+          rp: { name: 'QLVH An Việt' }, user: { id: ngauNhien(16), name: 'qlvh', displayName: 'QLVH An Việt' },
+          challenge: ngauNhien(32), pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+          authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required', residentKey: 'discouraged' },
+          timeout: 60000, attestation: 'none' } })
+          .then(function (c) { var k = kDoc(); k.cred = b64(c.rawId); kLuu(k); xongDat(); },
+                function (e) { g('tb').innerHTML = '<span class="loi">Chưa bật được (' + (e && e.name || 'lỗi') + ') — bấm lại hoặc «Để sau».</span>'; });
+      };
+    }
+    function xongDat() { dangKhoa = false; boLop(); if (xong) xong(); }
+  }
+
+  /** Gắn sau khi giao diện app đã ghi vào trang (document.open xoá mọi trình nghe cũ). */
+  function ganTheoDoiKhoa() {
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'hidden') { anLuc = Date.now(); if (khoaNgay && !dangKhoa) khoaManHinh(false, null); return; }
+      if (!dangKhoa && anLuc && Date.now() - anLuc >= KHOA_SAU_MS) khoaManHinh(false, null);
+    });
+    window.addEventListener('pageshow', function (ev) { if (ev.persisted && !dangKhoa) khoaManHinh(false, null); });
+    /* «Khách ký trên máy này» mở trang ký → khoá NGAY, để khách quay lại cũng chỉ thấy màn khoá */
+    var moGoc = window.open;
+    window.open = function (u) {
+      var w = moGoc.apply(window, arguments);
+      if (/\/ky\//.test(String(u || ''))) { khoaNgay = true; setTimeout(function () { if (!dangKhoa) khoaManHinh(false, null); }, 300); }
+      return w;
+    };
+    document.addEventListener('click', function (ev) {
+      var a = ev.target && ev.target.closest ? ev.target.closest('a[href*="/ky/"]') : null;
+      if (a) { khoaNgay = true; setTimeout(function () { if (!dangKhoa) khoaManHinh(false, null); }, 300); }
+    }, true);
+  }
+
   function caiDat(c, loi) {
     c = c || {};
     document.open();
@@ -144,7 +297,7 @@ function QLVH_BAT_DAU() {
       '<label for="u">Địa chỉ cổng (link /exec bản triển khai «Bất kỳ ai»)</label><input id="u" inputmode="url" autocomplete="off">' +
       '<label for="m">Mã bí mật</label><input id="m" autocomplete="off">' +
       '<button id="ok">Lưu và mở app</button>' +
-      '<div class="mo">Chỉ nhập một lần trên điện thoại này. Mã không nằm trong mã trang.</div></div></body></html>');
+      '<div class="mo">Chỉ nhập một lần trên điện thoại này. Mã không nằm trong mã trang. Lưu xong sẽ đặt lại khoá app (PIN, vân tay).</div></div></body></html>');
     document.close();
     document.getElementById('u').value = c.url || CONG_MAC_DINH;
     document.getElementById('m').value = c.k || '';
@@ -153,6 +306,7 @@ function QLVH_BAT_DAU() {
       if (!/^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(u)) { alert('Link phải dạng https://script.google.com/macros/s/…/exec'); return; }
       if (!m) { alert('Chưa nhập mã'); return; }
       luu(K.cfg, JSON.stringify({ url: u, k: m }));
+      try { localStorage.removeItem(K.khoa); } catch (e) {}     // mã mới = đặt lại khoá app
       location.href = location.pathname;
     };
   }
