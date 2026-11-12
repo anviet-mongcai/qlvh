@@ -18,7 +18,12 @@
   .mo{color:#5B6372;font-size:14px;margin-top:10px}
   .loi{color:#A3231C}
 </style>
-<!-- QLVH · app cài điện thoại (PWA) · v1.2 · 07/11/2026 · QĐ-D317 (a) · QĐ-D318 (a) · QĐ-D319 (a)
+<!-- QLVH · app cài điện thoại (PWA) · v1.3 · 13/11/2026 · đợt 1 «Nền an toàn» (A138 · QĐ-D368–D389, QĐ-D373 a)
+     v1.3: mỗi lệnh GHI mang MÃ THAO TÁC; cổng đã chống trùng (khoiDong trả «cong.chongTrung») thì mạng chập chờn tự gửi lại
+           đúng mã đó (≤ 2 lần), mất mạng hẳn thì GIỮ thao tác trong máy (≤ 300 KB, ≤ 24 giờ) và tự gửi khi có mạng —
+           máy chủ không ghi 2 lần. Lỗi trang → lệnh NK_baoLoiApp (nhật ký + Telegram, không gửi dữ liệu khách).
+           /qlvh/?thu = APP THỬ: cổng thử riêng (QLVH_THU, dữ liệu giả), lưu riêng trong máy, không khoá, nhãn «BẢN THỬ».
+     v1.2 · 07/11/2026 · QĐ-D317 (a) · QĐ-D318 (a) · QĐ-D319 (a)
      v1.2: KHOÁ APP — mỗi lần mở / quay lại sau ≥ 1 phút / ngay sau «Khách ký trên máy này» phải mở bằng vân tay·khuôn mặt
            (WebAuthn của điện thoại) hoặc PIN 6 số. Máy chưa cài app (chưa có mã) mở /qlvh/ → về trang chủ web;
            màn Cài đặt chỉ mở bằng /qlvh/?caidat (lưu mã mới = đặt lại khoá).
@@ -33,7 +38,10 @@ function QLVH_BAT_DAU() {
   'use strict';
   var CSS = "html,body{margin:0;background:#E9ECF0;font:16px ui-sans-serif,-apple-system,\"Segoe UI\",Roboto,Arial,sans-serif;color:#16181D} .hop{max-width:420px;margin:0 auto;padding:24px 16px} h1{font-size:20px;margin:0 0 12px} label{display:block;margin:14px 0 6px;font-weight:600} input{width:100%;box-sizing:border-box;font-size:16px;padding:12px;border:1px solid #C9CFD8;border-radius:10px} button{margin-top:18px;width:100%;font-size:17px;padding:14px;border:0;border-radius:12px;background:#12674A;color:#fff} .mo{color:#5B6372;font-size:14px;margin-top:10px} .loi{color:#A3231C}";
   var CONG_MAC_DINH = 'https://script.google.com/macros/s/AKfycbyYcei_p4LostxboXINvDDUVjRvmJdkelJ6GvOVzQBlQYDzWzV5ZwSZNcxbI6Rpdyd2/exec';   // link cổng (không phải mã bí mật)
-  var K = { cfg: 'pwa_cfg', ui: 'pwa_ui', uima: 'pwa_ui_ma', dl: 'pwa_dl', qt: 'pwa_qt', khoa: 'pwa_khoa' };
+  var THU = /[?&]thu\b/.test(location.search);  // v1.3 · QĐ-D373 (a): app thử — mọi thứ lưu riêng, không đụng app thật
+  var TT = THU ? 'pwa_thu_' : 'pwa_';
+  var K = { cfg: TT + 'cfg', ui: TT + 'ui', uima: TT + 'ui_ma', dl: TT + 'dl', qt: TT + 'qt', khoa: TT + 'khoa', hang: TT + 'hang', cong: TT + 'cong' };
+  if (THU) CONG_MAC_DINH = '';
   var KHOA_SAU_MS = 60000;                       // QĐ-D319 (a): quay lại sau ≥ 1 phút thì khoá
   function doc(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function luu(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
@@ -43,22 +51,115 @@ function QLVH_BAT_DAU() {
 
   var cfg = docJ(K.cfg), laCaiDat = /[?&]caidat\b/.test(location.search);
   if (laCaiDat) { caiDat(cfg); return; }
-  if (!cfg || !cfg.url || !cfg.k) { location.replace('/'); return; }      // QĐ-D317 C: máy lạ → trang chủ web
+  if (!cfg || !cfg.url || !cfg.k) { if (THU) { caiDat(cfg); return; } location.replace('/'); return; }      // QĐ-D317 C: máy lạ → trang chủ web
 
-  /* ── gọi cổng ── */
+  /* ── gọi cổng · v1.3: lệnh GHI có mã thao tác; cổng chống trùng → tự gửi lại / giữ trong máy khi mất mạng ── */
+  var DOC = ['khoiDong', 'layDuLieu', 'V26_dsQuocTich', 'V56_viecDinhKy', 'V57_trangThai', 'V58_kyTomTat', 'V66_duLieu',
+             'V73_nhDoc', 'V73_nhPCCC', 'V75_trangThai', 'V75_xemTruoc', 'NK_baoLoiApp'];
+  function maTT() { try { return crypto.randomUUID(); } catch (e) { return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 14); } }
+  function coChongTrung() { var c = docJ(K.cong); return !!(c && c.chongTrung); }
+  function goi1(body, ms) {
+    var ctl = (ms && typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var tm = ctl ? setTimeout(function () { ctl.abort(); }, ms) : 0;
+    return fetch(cfg.url, { method: 'POST', redirect: 'follow', signal: ctl ? ctl.signal : undefined,
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })
+      .then(function (r) {
+        clearTimeout(tm);
+        if (!r.ok) { var e = new Error('HTTP ' + r.status); e.mang = r.status >= 500 || r.status === 429; throw e; }
+        return r.json();
+      }, function (e) {
+        clearTimeout(tm);
+        var x = new Error(e && e.name === 'AbortError' ? 'Mạng chậm — quá thời gian chờ' : 'Mất mạng / không tới được máy chủ'); x.mang = true; throw x;
+      });
+  }
   function goi(fn, args, them) {
     var body = { k: cfg.k, fn: fn, args: args || [] };
     for (var x in (them || {})) body[x] = them[x];
-    return fetch(cfg.url, { method: 'POST', redirect: 'follow',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })
-      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-      .then(function (j) {
-        if (!j.ok) { var e = new Error(j.loi || 'Cổng báo lỗi'); e.saiMa = /Sai mã/.test(j.loi || ''); throw e; }
-        if (fn === 'layDuLieu') luu(K.dl, JSON.stringify(j.r));
-        if (fn === 'V26_dsQuocTich') luu(K.qt, JSON.stringify(j.r));
-        return j.r;
+    var ghi = DOC.indexOf(fn) < 0, an = ghi && coChongTrung(), lan = 0;
+    if (ghi && !body.id) body.id = maTT();
+    function thu() {
+      return goi1(body, an ? 90000 : (ghi ? 0 : 60000)).catch(function (e) {
+        if (e.mang && an && lan < 2) { lan++; return new Promise(function (ok) { setTimeout(ok, lan * 2500); }).then(thu); }
+        throw e;
       });
+    }
+    return thu().then(function (j) {
+      if (!j.ok) { var e = new Error(j.loi || 'Cổng báo lỗi'); e.saiMa = /Sai mã/.test(j.loi || ''); throw e; }
+      if (fn === 'layDuLieu') luu(K.dl, JSON.stringify(j.r));
+      if (fn === 'V26_dsQuocTich') luu(K.qt, JSON.stringify(j.r));
+      return j.r;
+    }, function (e) {
+      if (e.mang && an && xepHang(body)) {
+        var q = new Error('Mất mạng — thao tác đã được GIỮ trong máy, tự gửi khi có mạng. Đừng bấm lại.'); q.xepHang = true; throw q;
+      }
+      throw e;
+    });
   }
+
+  /* ── hàng chờ mất mạng (chỉ khi cổng đã chống trùng: gửi lại đúng mã, máy chủ không ghi 2 lần) ── */
+  function hangDoc() { return docJ(K.hang) || []; }
+  function hangLuu(h) { luu(K.hang, JSON.stringify(h)); veHang(); }
+  function xepHang(body) {
+    var nd = JSON.stringify([body.fn, body.args]);
+    if (nd.length > 300000) return false;                         // có ảnh lớn (giao xe) → không giữ; app vẫn lưu nháp như cũ
+    var h = hangDoc();
+    if (!h.some(function (x) { return x.id === body.id || JSON.stringify([x.fn, x.args]) === nd; }))
+      h.push({ id: body.id, fn: body.fn, args: body.args, luc: Date.now() });
+    hangLuu(h); return true;
+  }
+  var dangGuiHang = false;
+  function guiHang() {
+    var h = hangDoc();
+    if (!h.length || dangGuiHang || navigator.onLine === false) return;
+    var dau = h[0];
+    if (Date.now() - dau.luc > 86400000) {                        // quá 24 giờ → bỏ, báo rõ
+      hangLuu(h.slice(1)); thongBao('Bỏ 1 thao tác chờ mạng quá 24 giờ (' + dau.fn + ') — làm lại trên app nếu còn cần.', true); return guiHang();
+    }
+    dangGuiHang = true;
+    goi1({ k: cfg.k, fn: dau.fn, args: dau.args, id: dau.id }, 90000).then(function (j) {
+      dangGuiHang = false;
+      hangLuu(hangDoc().filter(function (x) { return x.id !== dau.id; }));
+      if (j.ok) thongBao('Đã gửi thao tác chờ mạng (' + dau.fn + ').', false);
+      else thongBao('Thao tác chờ mạng KHÔNG ghi được (' + dau.fn + '): ' + (j.loi || 'cổng báo lỗi'), true);
+      if (hangDoc().length) guiHang(); else if (daMoApp) capNhat();
+    }, function () { dangGuiHang = false; });
+  }
+  function thongBao(chu, loi) {
+    if (typeof window.bao === 'function') { try { window.bao(chu); } catch (e) {} }
+    if (loi || typeof window.bao !== 'function') { try { alert(chu); } catch (e) {} }
+  }
+  function veHang() {
+    if (!document.body) return;
+    var n = hangDoc().length, b = document.getElementById('pwaHang');
+    if (!n) { if (b) b.parentNode.removeChild(b); return; }
+    if (!b) { b = document.createElement('div'); b.id = 'pwaHang'; b.onclick = guiHang; document.body.appendChild(b); }
+    b.setAttribute('style', 'position:fixed;left:0;right:0;top:0;z-index:100002;padding:8px 12px;background:#B45309;color:#fff;' +
+      'font:600 15px ui-sans-serif,-apple-system,Roboto,Arial,sans-serif;text-align:center');
+    b.textContent = '⏳ ' + n + ' thao tác chờ mạng — tự gửi khi có mạng (chạm để gửi ngay)';
+  }
+  setInterval(guiHang, 60000);
+
+  /* ── lỗi trang → nhật ký máy chủ (NK_baoLoiApp) · tối đa 5 lỗi khác nhau mỗi lần mở · không gửi dữ liệu khách ── */
+  var daBao = {}, soBao = 0;
+  function baoLoi(loi, nguon) {
+    try {
+      loi = String(loi || '').slice(0, 300);
+      if (!loi || /^Script error\.?$|ResizeObserver loop/.test(loi) || daBao[loi] || soBao >= 5) return;
+      daBao[loi] = 1; soBao++;
+      goi1({ k: cfg.k, fn: 'NK_baoLoiApp', args: [{ loi: loi, nguon: String(nguon || '').slice(0, 120),
+        ver: 'khung 1.3' + (THU ? ' thử' : '') + ' · ui ' + (doc(K.uima) || '-'), ua: String(navigator.userAgent || '').slice(0, 120) }] }, 20000)
+        .catch(function () {});
+    } catch (e) {}
+  }
+  /* document.open() XOÁ mọi trình nghe trên window → gắn lại sau mỗi lần dựng trang (hien) */
+  function ganLangNghe() {
+    window.addEventListener('online', function () { setTimeout(guiHang, 1500); });
+    window.addEventListener('error', function (ev) {
+      if (ev && ev.message) baoLoi(ev.message, String(ev.filename || '').split('/').pop() + ':' + ev.lineno + ':' + ev.colno);
+    });
+    window.addEventListener('unhandledrejection', function (ev) { var r = ev && ev.reason; baoLoi(r && r.message || r, 'promise'); });
+  }
+  ganLangNghe();
 
   /* ── google.script.run giả: cùng cách gọi như app cũ ── */
   function taoRun(s, f, u) {
@@ -74,11 +175,11 @@ function QLVH_BAT_DAU() {
     } });
   }
   window.google = { script: { run: taoRun(null, null, undefined) } };
-  window.__PWA = { goi: goi, caiDat: function () { caiDat(cfg); } };
+  window.__PWA = { goi: goi, caiDat: function () { caiDat(cfg); }, thu: THU, hang: function () { return hangDoc().length; }, guiHang: guiHang };
 
   /* ── mở app (sau khi mở khoá) ── */
   var daMoApp = false;
-  khoaManHinh(true, moApp);
+  if (THU) moApp(); else khoaManHinh(true, moApp);              // app thử: dữ liệu giả, không khoá
 
   function moApp() {
   if (daMoApp) return; daMoApp = true;
@@ -100,6 +201,7 @@ function QLVH_BAT_DAU() {
 
   function luuKhoiDong(r) {
     luu(K.dl, JSON.stringify(r.dl)); luu(K.qt, JSON.stringify(r.qt));
+    if (r.cong) luu(K.cong, JSON.stringify(r.cong)); else { try { localStorage.removeItem(K.cong); } catch (e) {} }
     if (r.ui) { luu(K.ui, r.ui); luu(K.uima, r.ui_ma); }
   }
 
@@ -114,7 +216,12 @@ function QLVH_BAT_DAU() {
     var i = html.indexOf('<head>');
     html = i > -1 ? html.slice(0, i + 6) + them + html.slice(i + 6) : them + html;
     document.open(); document.write(html); document.close();
-    ganTheoDoiKhoa();
+    ganLangNghe();
+    if (!THU) ganTheoDoiKhoa();
+    else { var t = document.createElement('div'); t.textContent = 'BẢN THỬ';
+      t.setAttribute('style', 'position:fixed;right:0;bottom:64px;z-index:100003;background:#C2410C;color:#fff;font:700 13px sans-serif;padding:4px 10px;border-radius:10px 0 0 10px;pointer-events:none');
+      document.body.appendChild(t); }
+    veHang(); setTimeout(guiHang, 3000);
     if (khoa) khoaLai('Số lúc ' + ((dl && dl.bay_gio) || '').replace('T', ' ') + ' — đang cập nhật số mới…', false);
   }
 
@@ -293,7 +400,7 @@ function QLVH_BAT_DAU() {
     document.open();
     document.write('<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">' +
       '<link rel="manifest" href="manifest.webmanifest"><style>' + CSS + '</style></head><body><div class="hop">' +
-      '<h1>Cài đặt app QLVH</h1>' + (loi ? '<div class="loi">' + loi + '</div>' : '') +
+      '<h1>Cài đặt app QLVH' + (THU ? ' — BẢN THỬ (sổ QLVH_THU, dữ liệu giả)' : '') + '</h1>' + (loi ? '<div class="loi">' + loi + '</div>' : '') +
       '<label for="u">Địa chỉ cổng (link /exec bản triển khai «Bất kỳ ai»)</label><input id="u" inputmode="url" autocomplete="off">' +
       '<label for="m">Mã bí mật</label><input id="m" autocomplete="off">' +
       '<button id="ok">Lưu và mở app</button>' +
@@ -307,7 +414,7 @@ function QLVH_BAT_DAU() {
       if (!m) { alert('Chưa nhập mã'); return; }
       luu(K.cfg, JSON.stringify({ url: u, k: m }));
       try { localStorage.removeItem(K.khoa); } catch (e) {}     // mã mới = đặt lại khoá app
-      location.href = location.pathname;
+      location.href = location.pathname + (THU ? '?thu' : '');
     };
   }
 }
