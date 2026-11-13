@@ -18,7 +18,11 @@
   .mo{color:#5B6372;font-size:14px;margin-top:10px}
   .loi{color:#A3231C}
 </style>
-<!-- QLVH · app cài điện thoại (PWA) · v1.3 · 13/11/2026 · đợt 1 «Nền an toàn» (A138 · QĐ-D368–D389, QĐ-D373 a)
+<!-- QLVH · app cài điện thoại (PWA) · v1.4 · 13/11/2026 · đợt 2 (A138 · QĐ-D370 a)
+     v1.4: MỞ APP BẤM ĐƯỢC NGAY bằng số lần trước trong máy (bỏ lớp chặn chạm); số mới tải ngầm, dải báo trên đầu.
+           Mất mạng lúc mở: vẫn xem được số lần trước, tự thử lại. LỆNH GHI chỉ gửi khi số đang xem đã khớp sổ:
+           chưa có số mới → chờ lấy xong; sổ đã đổi so với số đang xem → KHÔNG ghi, báo nạp số mới rồi làm lại.
+     v1.3 · 13/11/2026 · đợt 1 «Nền an toàn» (A138 · QĐ-D368–D389, QĐ-D373 a)
      v1.3: mỗi lệnh GHI mang MÃ THAO TÁC; cổng đã chống trùng (khoiDong trả «cong.chongTrung») thì mạng chập chờn tự gửi lại
            đúng mã đó (≤ 2 lần), mất mạng hẳn thì GIỮ thao tác trong máy (≤ 300 KB, ≤ 24 giờ) và tự gửi khi có mạng —
            máy chủ không ghi 2 lần. Lỗi trang → lệnh NK_baoLoiApp (nhật ký + Telegram, không gửi dữ liệu khách).
@@ -77,6 +81,9 @@ function QLVH_BAT_DAU() {
     for (var x in (them || {})) body[x] = them[x];
     var ghi = DOC.indexOf(fn) < 0, an = ghi && coChongTrung(), lan = 0;
     if (ghi && !body.id) body.id = maTT();
+    if (ghi && daMoApp && fn !== 'NK_gopY') return choSoMoi().then(gui);      // v1.4 · QĐ-D370: không ghi trên số cũ
+    return gui();
+    function gui() {
     function thu() {
       return goi1(body, an ? 90000 : (ghi ? 0 : 60000)).catch(function (e) {
         if (e.mang && an && lan < 2) { lan++; return new Promise(function (ok) { setTimeout(ok, lan * 2500); }).then(thu); }
@@ -85,7 +92,7 @@ function QLVH_BAT_DAU() {
     }
     return thu().then(function (j) {
       if (!j.ok) { var e = new Error(j.loi || 'Cổng báo lỗi'); e.saiMa = /Sai mã/.test(j.loi || ''); throw e; }
-      if (fn === 'layDuLieu') luu(K.dl, JSON.stringify(j.r));
+      if (fn === 'layDuLieu') { luu(K.dl, JSON.stringify(j.r)); tuoi = true; choAp = null; boBang(); }
       if (fn === 'V26_dsQuocTich') luu(K.qt, JSON.stringify(j.r));
       return j.r;
     }, function (e) {
@@ -94,6 +101,36 @@ function QLVH_BAT_DAU() {
       }
       throw e;
     });
+    }
+  }
+
+  /* ── v1.4 · số đang xem có khớp sổ không (QĐ-D370 a) ── */
+  var tuoi = false, pCap = null, choAp = null, henCap = 0;
+  function vt(dl) {                                             // dấu vết phần số mà lệnh ghi dựa vào (bỏ phần đổi theo giờ)
+    try {
+      return JSON.stringify([(dl.xe || []).map(function (x) { return [x.stt, x.bien, x.tt, x.tt_goc, x.ghi_xe, x.nhan]; }),
+        (dl.dangThue || []).map(function (h) { return [h.soHD, h.stt, h.bien, h.han_iso, h.sl, h.dg, h.gop, h.ck, h.coc, h.ghiL, h.ht]; }),
+        (dl.suaChua || []).length, (dl.choDong || []).map(function (c) { return (c && c.soHD) || c; }), dl.ky || null, dl.dc || null]);
+    } catch (e) { return 'loi' + Math.random(); }
+  }
+  function ban() {                                              // đang ở màn tác vụ / đang mở bảng xe → không vẽ lại dưới tay
+    var m = document.getElementById('may'), s = document.getElementById('mo');
+    return !!((m && /tac-vu/.test(m.className)) || (s && s.className));
+  }
+  function choSoMoi() {
+    var doi = 'Sổ đã đổi so với số đang xem — CHƯA GHI. Xem lại số mới rồi làm lại.';
+    if (choAp) return Promise.reject(new Error(doi + ' (chạm dải trên đầu để nạp số mới)'));
+    if (tuoi) return Promise.resolve();
+    return (pCap || capNhat()).then(function (kq) {
+      if (kq && kq.doi) throw new Error(doi + (choAp ? ' (chạm dải trên đầu để nạp số mới)' : ''));
+      if (!tuoi) throw new Error('Chưa lấy được số mới (mất mạng?) — CHƯA GHI để tránh ghi trên số cũ. Có mạng lại rồi bấm lại.');
+    });
+  }
+  function apSo(r) {
+    luuKhoiDong(r); choAp = null; tuoi = true;
+    if (typeof window.napXong_ === 'function') window.napXong_(r.dl);
+    if (typeof window.napQTXong_ === 'function') window.napQTXong_(r.qt);
+    boBang();
   }
 
   /* ── hàng chờ mất mạng (chỉ khi cổng đã chống trùng: gửi lại đúng mã, máy chủ không ghi 2 lần) ── */
@@ -153,7 +190,7 @@ function QLVH_BAT_DAU() {
   }
   /* document.open() XOÁ mọi trình nghe trên window → gắn lại sau mỗi lần dựng trang (hien) */
   function ganLangNghe() {
-    window.addEventListener('online', function () { setTimeout(guiHang, 1500); });
+    window.addEventListener('online', function () { setTimeout(guiHang, 1500); if (!tuoi && daMoApp) setTimeout(capNhat, 800); });
     window.addEventListener('error', function (ev) {
       if (ev && ev.message) baoLoi(ev.message, String(ev.filename || '').split('/').pop() + ':' + ev.lineno + ':' + ev.colno);
     });
@@ -190,7 +227,7 @@ function QLVH_BAT_DAU() {
   } else {
     $('trangThai').textContent = 'Lần đầu mở: đang tải giao diện và số liệu…';
     goi('khoiDong', [], { ui_ma: '' }).then(function (r) {
-      luuKhoiDong(r);
+      luuKhoiDong(r); tuoi = true;
       hien(r.ui, r.dl, r.qt, false);
     }, function (e) {
       if (e.saiMa) return caiDat(cfg, e.message);
@@ -209,10 +246,10 @@ function QLVH_BAT_DAU() {
   function hien(html, dl, qt, khoa) {
     window.__DL0 = dl; window.__QT0 = qt;
     var them = '<link rel="manifest" href="manifest.webmanifest"><meta name="apple-mobile-web-app-capable" content="yes">' +
-      '<style>#pwaKhoa{position:fixed;inset:0;z-index:99999;background:transparent}' +
-      '#pwaBang{position:fixed;left:0;right:0;bottom:0;z-index:100000;padding:10px 14px calc(10px + env(safe-area-inset-bottom));' +
-      'background:#1D4E89;color:#fff;font:15px ui-sans-serif,-apple-system,Roboto,Arial,sans-serif;text-align:center}' +
-      '#pwaBang.loi{background:#A3231C}</style>';
+      '<style>#pwaBang{position:fixed;left:0;right:0;top:0;z-index:100000;padding:calc(4px + env(safe-area-inset-top)) 12px 4px;' +
+      'background:rgba(29,78,137,.94);color:#fff;font:13px ui-sans-serif,-apple-system,Roboto,Arial,sans-serif;text-align:center;pointer-events:none}' +
+      '#pwaBang.loi,#pwaBang.doi{pointer-events:auto;padding-top:calc(9px + env(safe-area-inset-top));padding-bottom:9px;font-size:15px}' +
+      '#pwaBang.loi{background:#A3231C}#pwaBang.doi{background:#B45309}</style>';
     var i = html.indexOf('<head>');
     html = i > -1 ? html.slice(0, i + 6) + them + html.slice(i + 6) : them + html;
     document.open(); document.write(html); document.close();
@@ -222,35 +259,41 @@ function QLVH_BAT_DAU() {
       t.setAttribute('style', 'position:fixed;right:0;bottom:64px;z-index:100003;background:#C2410C;color:#fff;font:700 13px sans-serif;padding:4px 10px;border-radius:10px 0 0 10px;pointer-events:none');
       document.body.appendChild(t); }
     veHang(); setTimeout(guiHang, 3000);
-    if (khoa) khoaLai('Số lúc ' + ((dl && dl.bay_gio) || '').replace('T', ' ') + ' — đang cập nhật số mới…', false);
+    if (khoa) bang('Số lúc ' + ((dl && dl.bay_gio) || '').replace('T', ' ') + ' — đang lấy số mới…', '');
   }
 
-  function khoaLai(chu, loi) {
+  function bang(chu, loai) {                                    // dải báo trên đầu — KHÔNG chặn chạm
     function lam() {
-      var k = document.getElementById('pwaKhoa');
-      if (!k) { k = document.createElement('div'); k.id = 'pwaKhoa'; document.body.appendChild(k); }
       var b = document.getElementById('pwaBang');
-      if (!b) { b = document.createElement('div'); b.id = 'pwaBang'; document.body.appendChild(b); b.onclick = function () { if (b.className === 'loi') capNhat(); }; }
-      b.textContent = chu; b.className = loi ? 'loi' : '';
+      if (!b) { b = document.createElement('div'); b.id = 'pwaBang'; document.body.appendChild(b);
+        b.onclick = function () { if (b.className === 'doi' && choAp) apSo(choAp); else if (b.className === 'loi') capNhat(); }; }
+      b.textContent = chu; b.className = loai || '';
     }
     if (document.body) lam(); else document.addEventListener('DOMContentLoaded', lam);
   }
-  function moKhoa() {
-    ['pwaKhoa', 'pwaBang'].forEach(function (id) { var e = document.getElementById(id); if (e) e.parentNode.removeChild(e); });
-  }
+  function boBang() { var e = document.getElementById('pwaBang'); if (e) e.parentNode.removeChild(e); }
 
+  /* Lấy số mới ngầm. Trả Promise → {doi: số mới KHÁC số đang xem} | false (không lấy được). */
   function capNhat() {
-    khoaLai('Đang cập nhật số mới…', false);
-    goi('khoiDong', [], { ui_ma: doc(K.uima) || '' }).then(function (r) {
-      luuKhoiDong(r);
-      if (typeof window.napXong_ === 'function') window.napXong_(r.dl);
-      if (typeof window.napQTXong_ === 'function') window.napQTXong_(r.qt);
-      moKhoa();
+    if (pCap) return pCap;
+    clearTimeout(henCap);
+    if (!document.getElementById('pwaBang') || document.getElementById('pwaBang').className === 'loi') bang('Đang lấy số mới…', '');
+    pCap = goi('khoiDong', [], { ui_ma: doc(K.uima) || '' }).then(function (r) {
+      pCap = null;
+      var cu = docJ(K.dl), doi = !cu || vt(cu) !== vt(r.dl);
+      if (!doi) { luuKhoiDong(r); tuoi = true; choAp = null; if (!ban()) apSo(r); else boBang(); }
+      else if (!ban()) apSo(r);
+      else { choAp = r; tuoi = false; bang('Sổ có thay đổi — chạm đây để nạp số mới', 'doi'); }
       if (r.ui && typeof window.bao === 'function') window.bao('Có bản giao diện mới — mở lại app để dùng.');
+      return { doi: doi };
     }, function (e) {
-      if (e.saiMa) return caiDat(cfg, e.message);
-      khoaLai('Chưa cập nhật được (' + e.message + '). Số đang xem là của lần trước — chạm để thử lại.', true);
+      pCap = null;
+      if (e.saiMa) { caiDat(cfg, e.message); return false; }
+      bang('Chưa lấy được số mới (' + e.message + ') — đang xem số lần trước, chưa ghi được. Chạm để thử lại.', 'loi');
+      henCap = setTimeout(function () { if (!tuoi && document.visibilityState !== 'hidden') capNhat(); }, 20000);
+      return false;
     });
+    return pCap;
   }
 
   function $(id) { return document.getElementById(id); }

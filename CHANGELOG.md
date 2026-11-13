@@ -2,6 +2,12 @@
 
 Mỗi đợt ghi 1 mục: phiên bản · ngày · đã đổi gì · cách quay về. Chi tiết nội bộ nằm ở tài liệu A của project.
 
+## Khung v1.4 · 13/11/2026 · đợt 2 (QĐ-D370 a)
+- Mở app bấm được ngay bằng số lần trước trong máy (bỏ lớp chặn chạm); số mới tải ngầm, dải báo nhỏ trên đầu.
+- Mở app khi không có mạng: xem được số lần trước; chưa ghi được; tự thử lại khi có mạng.
+- Lệnh ghi chỉ gửi khi số đang xem khớp sổ: chưa có số mới → chờ; sổ đã đổi → không ghi, báo nạp số mới rồi làm lại.
+- sw khung v11. Không cần triển khai cổng.
+
 ## Đợt 1 «Nền an toàn» · 13/11/2026
 | Phần | Phiên bản | Thay đổi | Quay về |
 |---|---|---|---|
