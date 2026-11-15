@@ -2,6 +2,13 @@
 
 Mỗi đợt ghi 1 mục: phiên bản · ngày · đã đổi gì · cách quay về. Chi tiết nội bộ nằm ở tài liệu A của project.
 
+## App v4.6 + khung v1.5 · 15/11/2026 · đợt 2 (QĐ-D387 a · QĐ-D388 a)
+- Màn «Hôm nay» (mở app vào đây): 6 ô xe, việc cần làm xếp theo mức gấp, mỗi việc 1 nút.
+- Thanh dưới: Hôm nay · Xe · [+] · Việc · Sổ. Kiểm xe, Nhắc việc mở từ [+], Hôm nay, Sổ.
+- Chữ hiển thị bỏ mã nội bộ. «Có gì mới» hiện 1 lần sau cập nhật.
+- Trả xe: các bước app tự ghi khi đóng lượt không còn ô tick tay.
+- 3 lượt đọc nền lúc mở app gộp thành 1 (máy chủ nen.gs · V80_nen). sw khung v12. Cổng: Phiên bản 51.
+
 ## Khung v1.4 · 13/11/2026 · đợt 2 (QĐ-D370 a)
 - Mở app bấm được ngay bằng số lần trước trong máy (bỏ lớp chặn chạm); số mới tải ngầm, dải báo nhỏ trên đầu.
 - Mở app khi không có mạng: xem được số lần trước; chưa ghi được; tự thử lại khi có mạng.

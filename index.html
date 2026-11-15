@@ -18,7 +18,9 @@
   .mo{color:#5B6372;font-size:14px;margin-top:10px}
   .loi{color:#A3231C}
 </style>
-<!-- QLVH · app cài điện thoại (PWA) · v1.4 · 13/11/2026 · đợt 2 (A138 · QĐ-D370 a)
+<!-- QLVH · app cài điện thoại (PWA) · v1.5 · 13/11/2026 · đợt 2
+     v1.5: 3 lệnh đọc nền lúc mở app (Việc định kỳ · Kiểm xe · Nhắc) gộp thành 1 lượt gọi V80_nen khi cổng báo «cong.nen».
+     v1.4 · 13/11/2026 · đợt 2 (A138 · QĐ-D370 a)
      v1.4: MỞ APP BẤM ĐƯỢC NGAY bằng số lần trước trong máy (bỏ lớp chặn chạm); số mới tải ngầm, dải báo trên đầu.
            Mất mạng lúc mở: vẫn xem được số lần trước, tự thử lại. LỆNH GHI chỉ gửi khi số đang xem đã khớp sổ:
            chưa có số mới → chờ lấy xong; sổ đã đổi so với số đang xem → KHÔNG ghi, báo nạp số mới rồi làm lại.
@@ -59,7 +61,9 @@ function QLVH_BAT_DAU() {
 
   /* ── gọi cổng · v1.3: lệnh GHI có mã thao tác; cổng chống trùng → tự gửi lại / giữ trong máy khi mất mạng ── */
   var DOC = ['khoiDong', 'layDuLieu', 'V26_dsQuocTich', 'V56_viecDinhKy', 'V57_trangThai', 'V58_kyTomTat', 'V66_duLieu',
-             'V73_nhDoc', 'V73_nhPCCC', 'V75_trangThai', 'V75_xemTruoc', 'NK_baoLoiApp'];
+             'V73_nhDoc', 'V73_nhPCCC', 'V75_trangThai', 'V75_xemTruoc', 'NK_baoLoiApp', 'V80_nen'];
+  var NEN = ['V56_viecDinhKy', 'V66_duLieu', 'V73_nhDoc'], pNen = null, lucNen = 0;        // v1.5: gộp 3 lệnh đọc nền
+  function coNen() { var c = docJ(K.cong); return !!(c && c.nen); }
   function maTT() { try { return crypto.randomUUID(); } catch (e) { return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 14); } }
   function coChongTrung() { var c = docJ(K.cong); return !!(c && c.chongTrung); }
   function goi1(body, ms) {
@@ -77,6 +81,10 @@ function QLVH_BAT_DAU() {
       });
   }
   function goi(fn, args, them) {
+    if (NEN.indexOf(fn) > -1 && !(args && args.length) && coNen()) {
+      if (!pNen || Date.now() - lucNen > 12000) { lucNen = Date.now(); pNen = goi('V80_nen', []); }
+      return pNen.then(function (o) { var x = o && o[fn]; if (!x) throw new Error('Thiếu ' + fn); if (!x.ok) throw new Error(x.loi || 'Lỗi đọc'); return x.r; });
+    }
     var body = { k: cfg.k, fn: fn, args: args || [] };
     for (var x in (them || {})) body[x] = them[x];
     var ghi = DOC.indexOf(fn) < 0, an = ghi && coChongTrung(), lan = 0;
