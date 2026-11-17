@@ -2,6 +2,9 @@
 
 Mỗi đợt ghi 1 mục: phiên bản · ngày · đã đổi gì · cách quay về. Chi tiết nội bộ nằm ở tài liệu A của project.
 
+## App v4.8.1 · 17/11/2026 (thử máy thật)
+- Giấy tờ CCCD: máy ảnh trong app dò mã QR liên tục, thấy mã thì tự chụp + tự điền. Hộ chiếu / giấy khác: dùng máy ảnh của máy (đọc MRZ cần ảnh gốc). Máy ảnh xin độ phân giải cao + lấy nét liên tục. Cổng: Phiên bản 54.
+
 ## App v4.8 + khung v1.6 · 17/11/2026 · đợt 3 (QĐ-D375 a · QĐ-D376 a · QĐ-D389 a)
 - v4.7 (16/11): «+1 ngày» 2 chạm ở Hôm nay · QR nhận tiền (VietQR tạo trong máy, tài khoản lưu trong máy).
 - v4.8: chụp ảnh ngay trong app 1 chạm/ảnh, tự sang ô kế tiếp (giữ «Máy ảnh của máy» và 🖼 Thư viện) · mọi ảnh ≤ 250 KB.
