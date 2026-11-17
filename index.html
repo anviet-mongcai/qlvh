@@ -61,7 +61,7 @@ function QLVH_BAT_DAU() {
 
   /* ── gọi cổng · v1.3: lệnh GHI có mã thao tác; cổng chống trùng → tự gửi lại / giữ trong máy khi mất mạng ── */
   var DOC = ['khoiDong', 'layDuLieu', 'V26_dsQuocTich', 'V56_viecDinhKy', 'V57_trangThai', 'V58_kyTomTat', 'V66_duLieu',
-             'V73_nhDoc', 'V73_nhPCCC', 'V75_trangThai', 'V75_xemTruoc', 'NK_baoLoiApp', 'V80_nen'];
+             'V73_nhDoc', 'V73_nhPCCC', 'V75_trangThai', 'V75_xemTruoc', 'NK_baoLoiApp', 'V80_nen', 'V81_khachQuen'];   // v1.6: + khách quen
   var NEN = ['V56_viecDinhKy', 'V66_duLieu', 'V73_nhDoc'], pNen = null, lucNen = 0;        // v1.5: gộp 3 lệnh đọc nền
   function coNen() { var c = docJ(K.cong); return !!(c && c.nen); }
   function maTT() { try { return crypto.randomUUID(); } catch (e) { return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 14); } }
@@ -104,10 +104,11 @@ function QLVH_BAT_DAU() {
       if (fn === 'V26_dsQuocTich') luu(K.qt, JSON.stringify(j.r));
       return j.r;
     }, function (e) {
-      if (e.mang && an && xepHang(body)) {
+      if (!(e.mang && an)) throw e;
+      return xepHangP(body).then(function (giu) {
+        if (!giu) throw e;
         var q = new Error('Mất mạng — thao tác đã được GIỮ trong máy, tự gửi khi có mạng. Đừng bấm lại.'); q.xepHang = true; throw q;
-      }
-      throw e;
+      });
     });
     }
   }
@@ -152,6 +153,34 @@ function QLVH_BAT_DAU() {
       h.push({ id: body.id, fn: body.fn, args: body.args, luc: Date.now() });
     hangLuu(h); return true;
   }
+  /* v1.6 · lệnh có ảnh lớn (trả xe) → giữ ở IndexedDB, hàng chờ chỉ ghi mã; máy chủ chặn trả 2 lần (QĐ-D346) */
+  var LON = ['dongLuotThue'];
+  function kho(cach, k, v) {
+    return new Promise(function (ok) {
+      try {
+        var r = indexedDB.open('qlvh_khung', 1);
+        r.onupgradeneeded = function () { r.result.createObjectStore('hang'); };
+        r.onerror = function () { ok(null); };
+        r.onsuccess = function () {
+          try {
+            var tx = r.result.transaction('hang', cach === 'get' ? 'readonly' : 'readwrite'), st = tx.objectStore('hang');
+            var rq = cach === 'get' ? st.get(k) : (cach === 'put' ? st.put(v, k) : st['delete'](k));
+            rq.onsuccess = function () { ok(cach === 'get' ? (rq.result || null) : true); }; rq.onerror = function () { ok(null); };
+          } catch (x) { ok(null); }
+        };
+      } catch (x) { ok(null); }
+    });
+  }
+  function xepHangP(body) {
+    var nd = JSON.stringify([body.fn, body.args]);
+    if (nd.length <= 300000) return Promise.resolve(xepHang(body));
+    if (LON.indexOf(body.fn) < 0 || nd.length > 12000000 || typeof indexedDB === 'undefined') return Promise.resolve(false);
+    if (hangDoc().some(function (x) { return x.id === body.id; })) return Promise.resolve(true);
+    return kho('put', body.id, body.args).then(function (ok) {
+      if (!ok) return false;
+      var h = hangDoc(); h.push({ id: body.id, fn: body.fn, args: null, idb: 1, luc: Date.now() }); hangLuu(h); return true;
+    });
+  }
   var dangGuiHang = false;
   function guiHang() {
     var h = hangDoc();
@@ -161,13 +190,21 @@ function QLVH_BAT_DAU() {
       hangLuu(h.slice(1)); thongBao('Bỏ 1 thao tác chờ mạng quá 24 giờ (' + dau.fn + ') — làm lại trên app nếu còn cần.', true); return guiHang();
     }
     dangGuiHang = true;
-    goi1({ k: cfg.k, fn: dau.fn, args: dau.args, id: dau.id }, 90000).then(function (j) {
+    (dau.idb ? kho('get', dau.id) : Promise.resolve(dau.args)).then(function (args) {
+      if (dau.idb && !args) {
+        dangGuiHang = false; hangLuu(hangDoc().filter(function (x) { return x.id !== dau.id; }));
+        thongBao('Không đọc được thao tác chờ mạng (' + dau.fn + ') trong máy — làm lại trên app.', true); return;
+      }
+      return goi1({ k: cfg.k, fn: dau.fn, args: args, id: dau.id }, 90000).then(daGui, function () { dangGuiHang = false; });
+    });
+    function daGui(j) {
       dangGuiHang = false;
       hangLuu(hangDoc().filter(function (x) { return x.id !== dau.id; }));
+      if (dau.idb) kho('del', dau.id);
       if (j.ok) thongBao('Đã gửi thao tác chờ mạng (' + dau.fn + ').', false);
       else thongBao('Thao tác chờ mạng KHÔNG ghi được (' + dau.fn + '): ' + (j.loi || 'cổng báo lỗi'), true);
       if (hangDoc().length) guiHang(); else if (daMoApp) capNhat();
-    }, function () { dangGuiHang = false; });
+    }
   }
   function thongBao(chu, loi) {
     if (typeof window.bao === 'function') { try { window.bao(chu); } catch (e) {} }
@@ -192,7 +229,7 @@ function QLVH_BAT_DAU() {
       if (!loi || /^Script error\.?$|ResizeObserver loop/.test(loi) || daBao[loi] || soBao >= 5) return;
       daBao[loi] = 1; soBao++;
       goi1({ k: cfg.k, fn: 'NK_baoLoiApp', args: [{ loi: loi, nguon: String(nguon || '').slice(0, 120),
-        ver: 'khung 1.3' + (THU ? ' thử' : '') + ' · ui ' + (doc(K.uima) || '-'), ua: String(navigator.userAgent || '').slice(0, 120) }] }, 20000)
+        ver: 'khung 1.6' + (THU ? ' thử' : '') + ' · ui ' + (doc(K.uima) || '-'), ua: String(navigator.userAgent || '').slice(0, 120) }] }, 20000)
         .catch(function () {});
     } catch (e) {}
   }
