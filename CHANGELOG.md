@@ -2,6 +2,15 @@
 
 Mỗi đợt ghi 1 mục: phiên bản · ngày · đã đổi gì · cách quay về. Chi tiết nội bộ nằm ở tài liệu A của project.
 
+## App v4.9 + khung v1.7 · 18/11/2026 · đợt 4 «Lịch & Khách» (QĐ-D378 a · QĐ-D379 a · QĐ-D387 a)
+- Thanh dưới: Hôm nay · Lịch · [+] · Khách · Sổ (Đội xe, Việc khác mở từ Sổ / Hôm nay).
+- Lịch: lưới 7 ngày theo xe (đang thuê · đặt trước · sửa), chạm ô trống để đặt trước. Giữ xe theo khung giờ, không thu tiền giữ chỗ; trùng giờ với lượt thuê / lượt đặt khác của cùng xe → chặn và gợi ý xe cùng dòng còn trống. Hôm nay có mục «Hẹn giao xe»; «Giao xe ngay» từ lượt đặt tự điền phiếu, giao xong tự đánh dấu «Đã giao».
+- Khách: tìm nhanh tên · SĐT · số giấy tờ · biển số · số HĐ; hồ sơ khách gộp theo số giấy tờ (app chỉ thấy số đã che); cờ «Cần lưu ý» + sự việc chỉ Anh thấy, cảnh báo ở màn Giao xe.
+- Máy chủ: lich_khach.gs (tab ẩn DAT_XE, KHACH). Khung v1.7: 2 lệnh đọc mới V82_lich, V82_khach; sw khung v14. Cổng: Phiên bản 63 (quay về: 62).
+
+## App v4.8.2 → v4.8.9 · 18/11/2026 (máy ảnh giấy tờ)
+- Máy ảnh: ống chính + đổi ống, chạm lấy nét, đèn; QR CCCD đọc cả ảnh gốc; mặt sau tự chụp khi giữ yên; hộ chiếu / thông hành đọc mã MRZ ngay khi chụp; ảnh mẫu hướng dẫn chụp; họ tên chỉ tự điền khi 2 lượt đọc trùng. Cổng: Phiên bản 55 → 62.
+
 ## App v4.8.1 · 17/11/2026 (thử máy thật)
 - Giấy tờ CCCD: máy ảnh trong app dò mã QR liên tục, thấy mã thì tự chụp + tự điền. Hộ chiếu / giấy khác: dùng máy ảnh của máy (đọc MRZ cần ảnh gốc). Máy ảnh xin độ phân giải cao + lấy nét liên tục. Cổng: Phiên bản 54.
 

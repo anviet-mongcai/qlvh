@@ -61,7 +61,8 @@ function QLVH_BAT_DAU() {
 
   /* ── gọi cổng · v1.3: lệnh GHI có mã thao tác; cổng chống trùng → tự gửi lại / giữ trong máy khi mất mạng ── */
   var DOC = ['khoiDong', 'layDuLieu', 'V26_dsQuocTich', 'V56_viecDinhKy', 'V57_trangThai', 'V58_kyTomTat', 'V66_duLieu',
-             'V73_nhDoc', 'V73_nhPCCC', 'V75_trangThai', 'V75_xemTruoc', 'NK_baoLoiApp', 'V80_nen', 'V81_khachQuen'];   // v1.6: + khách quen
+             'V73_nhDoc', 'V73_nhPCCC', 'V75_trangThai', 'V75_xemTruoc', 'NK_baoLoiApp', 'V80_nen', 'V81_khachQuen',
+             'V82_lich', 'V82_khach'];   // v1.6: + khách quen · v1.7: + lịch đặt xe, hồ sơ khách
   var NEN = ['V56_viecDinhKy', 'V66_duLieu', 'V73_nhDoc'], pNen = null, lucNen = 0;        // v1.5: gộp 3 lệnh đọc nền
   function coNen() { var c = docJ(K.cong); return !!(c && c.nen); }
   function maTT() { try { return crypto.randomUUID(); } catch (e) { return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 14); } }
@@ -229,7 +230,7 @@ function QLVH_BAT_DAU() {
       if (!loi || /^Script error\.?$|ResizeObserver loop/.test(loi) || daBao[loi] || soBao >= 5) return;
       daBao[loi] = 1; soBao++;
       goi1({ k: cfg.k, fn: 'NK_baoLoiApp', args: [{ loi: loi, nguon: String(nguon || '').slice(0, 120),
-        ver: 'khung 1.6' + (THU ? ' thử' : '') + ' · ui ' + (doc(K.uima) || '-'), ua: String(navigator.userAgent || '').slice(0, 120) }] }, 20000)
+        ver: 'khung 1.7' + (THU ? ' thử' : '') + ' · ui ' + (doc(K.uima) || '-'), ua: String(navigator.userAgent || '').slice(0, 120) }] }, 20000)
         .catch(function () {});
     } catch (e) {}
   }
