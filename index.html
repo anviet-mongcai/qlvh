@@ -62,7 +62,7 @@ function QLVH_BAT_DAU() {
   /* ── gọi cổng · v1.3: lệnh GHI có mã thao tác; cổng chống trùng → tự gửi lại / giữ trong máy khi mất mạng ── */
   var DOC = ['khoiDong', 'layDuLieu', 'V26_dsQuocTich', 'V56_viecDinhKy', 'V57_trangThai', 'V58_kyTomTat', 'V66_duLieu',
              'V73_nhDoc', 'V73_nhPCCC', 'V75_trangThai', 'V75_xemTruoc', 'NK_baoLoiApp', 'V80_nen', 'V81_khachQuen',
-             'V82_lich', 'V82_khach'];   // v1.6: + khách quen · v1.7: + lịch đặt xe, hồ sơ khách
+             'V82_lich', 'V82_khach', 'V83_chiDoc'];   // v1.6: + khách quen · v1.7: + lịch đặt xe, hồ sơ khách · v1.8: + đọc chi
   var NEN = ['V56_viecDinhKy', 'V66_duLieu', 'V73_nhDoc'], pNen = null, lucNen = 0;        // v1.5: gộp 3 lệnh đọc nền
   function coNen() { var c = docJ(K.cong); return !!(c && c.nen); }
   function maTT() { try { return crypto.randomUUID(); } catch (e) { return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 14); } }
@@ -90,7 +90,7 @@ function QLVH_BAT_DAU() {
     for (var x in (them || {})) body[x] = them[x];
     var ghi = DOC.indexOf(fn) < 0, an = ghi && coChongTrung(), lan = 0;
     if (ghi && !body.id) body.id = maTT();
-    if (ghi && daMoApp && fn !== 'NK_gopY') return choSoMoi().then(gui);      // v1.4 · QĐ-D370: không ghi trên số cũ
+    if (ghi && daMoApp && fn !== 'NK_gopY' && !/^V8[03]_/.test(fn)) return choSoMoi().then(gui);      // v1.4 · QĐ-D370: không ghi trên số cũ · v1.8: lệnh Việc / Chi không dựa vào số lượt thuê → bỏ chặn
     return gui();
     function gui() {
     function thu() {

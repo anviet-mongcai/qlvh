@@ -2,6 +2,12 @@
 
 Mỗi đợt ghi 1 mục: phiên bản · ngày · đã đổi gì · cách quay về. Chi tiết nội bộ nằm ở tài liệu A của project.
 
+## App v4.11 + khung v1.8 · 20/11/2026 · giai đoạn ② «Chi tiền trên app» (QĐ-D413 a · QĐ-D431 → D437 a)
+- [+] › Ghi chi: «50» = 50.000đ, 6 khoản hay chi học từ sổ, 7 nhóm, xe, ngày, 📷 hoá đơn (đọc số trong máy, ảnh lưu Drive CHUNG_TU_CHI). Chi gần đây + ↩ huỷ trong 3 ngày (tiền về 0, giữ dòng).
+- Hôm nay › Chi tới hạn: nạp SIM (qua NHAC_VIEC ≤ 10′) · điện tháng (28 → mùng 5) · hoa hồng chưa trả («Đã trả» → C06).
+- Khung v1.8: nhận Chia sẻ (tin ngân hàng → QLVH → Ghi chi điền sẵn) — cài lại biểu tượng app 1 lần; lệnh đọc V83_chiDoc; lệnh ghi V80_/V83_ không bị chặn «sổ đã đổi»; sw khung v15.
+- Máy chủ: zz_v83_chi.gs · NHAC_VIEC zz_NV16_nap_app.gs. App v4.10 (20/11): màn Việc gộp (QĐ-D427–D430).
+
 ## App v4.9 + khung v1.7 · 18/11/2026 · đợt 4 «Lịch & Khách» (QĐ-D378 a · QĐ-D379 a · QĐ-D387 a)
 - Thanh dưới: Hôm nay · Lịch · [+] · Khách · Sổ (Đội xe, Việc khác mở từ Sổ / Hôm nay).
 - Lịch: lưới 7 ngày theo xe (đang thuê · đặt trước · sửa), chạm ô trống để đặt trước. Giữ xe theo khung giờ, không thu tiền giữ chỗ; trùng giờ với lượt thuê / lượt đặt khác của cùng xe → chặn và gợi ý xe cùng dòng còn trống. Hôm nay có mục «Hẹn giao xe»; «Giao xe ngay» từ lượt đặt tự điền phiếu, giao xong tự đánh dấu «Đã giao».
